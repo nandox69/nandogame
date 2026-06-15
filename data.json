@@ -1,0 +1,1025 @@
+{
+  "users": [
+    {
+      "username": "nando",
+      "password": "$2a$10$AkNqrzxQnyYE3S7KdzWZZ.oFkiQHsG/0szQGSSyoIHYr5ZKOJnLm.",
+      "role": "admin",
+      "name": "Nando",
+      "adminPin": "766976"
+    },
+    {
+      "username": "tecnico",
+      "password": "$2a$10$TcR0PZv2tM71NmWkMH5wAOb/SFKsx5QV6Nx8egj1MO4fjQx09LfAa",
+      "role": "tecnico",
+      "name": "marcelo",
+      "trialExpiry": 1781786239110
+    },
+    {
+      "username": "carlos",
+      "password": "$2a$10$fac09cvOpJUKGgmomPrRAe/dyq3RFGDxppFZ0YSc6wJIpPspzmbvK",
+      "role": "admin",
+      "name": "verdugo"
+    },
+    {
+      "username": "jorge",
+      "password": "$2a$10$nI7Twn5y7N6c5dMiVYbPI.G18i9numIF1lXalMX8SckWqDEjwqTqe",
+      "role": "recaudador",
+      "name": "viejo caliente",
+      "trialExpiry": 1782097173693
+    }
+  ],
+  "machines": [
+    {
+      "id": "M0001",
+      "name": "ngame",
+      "apiKey": "nk_baaa62f2a2c3b49e32d343682c373a8474613bce869b7671",
+      "location": "osorno",
+      "installer": "nando",
+      "image": "",
+      "created": "2026-06-15T02:43:52.585Z",
+      "lastSeen": "2026-06-15T05:30:17.345Z",
+      "status": "online",
+      "observations": [],
+      "counters": {
+        "coin1": {
+          "enabled": true,
+          "label": "Moneda 1",
+          "valuePerPulse": 1985
+        },
+        "coin2": {
+          "enabled": false,
+          "label": "Moneda 2",
+          "valuePerPulse": 200
+        },
+        "bill": {
+          "enabled": false,
+          "label": "Billete",
+          "valuePerPulse": 1000
+        },
+        "win": {
+          "enabled": true,
+          "label": "Premio",
+          "valuePerPulse": 41
+        }
+      },
+      "digitalReadings": {
+        "coin1": 37,
+        "win": 201
+      },
+      "pelucheMax": 30,
+      "rssi": -53,
+      "ultimoCierre": {
+        "fecha": "2026-06-15T03:57:45.870Z",
+        "usuario": "nando",
+        "efectivo": 0,
+        "premios": 0,
+        "mp": 0,
+        "pesos": 0
+      },
+      "creditsSent": 4,
+      "pelucheRestockAt": 200,
+      "initialCounters": {
+        "coin": 125422,
+        "out": 2544
+      },
+      "counterHistory": [
+        {
+          "timestamp": "2026-06-15T03:57:45.873Z",
+          "user": "nando",
+          "coin": 125422,
+          "out": 2544
+        }
+      ]
+    },
+    {
+      "id": "M0002",
+      "name": "nando",
+      "apiKey": "nk_5bc3e4cf5f0d797fa01d067e6815cc5947af383814036559",
+      "location": "mall costanera",
+      "installer": "nando",
+      "image": "",
+      "created": "2026-06-15T03:20:53.816Z",
+      "lastSeen": null,
+      "status": "unknown",
+      "observations": [],
+      "counters": {
+        "coin1": {
+          "label": "Moneda 1",
+          "valuePerPulse": 500,
+          "enabled": true
+        },
+        "coin2": {
+          "label": "Moneda 2",
+          "valuePerPulse": 200,
+          "enabled": false
+        },
+        "bill": {
+          "label": "Billete",
+          "valuePerPulse": 1000,
+          "enabled": false
+        },
+        "win": {
+          "label": "Premio",
+          "valuePerPulse": 0,
+          "enabled": true
+        }
+      },
+      "initialCounters": {
+        "coin": 198885,
+        "out": 12
+      },
+      "counterHistory": [
+        {
+          "timestamp": "2026-06-15T03:20:53.816Z",
+          "user": "nando",
+          "coin": 198885,
+          "out": 12
+        }
+      ],
+      "digitalReadings": {
+        "coin1": 0,
+        "coin2": 0,
+        "bill": 0,
+        "win": 0
+      },
+      "pelucheMax": 30,
+      "creditValue": 100,
+      "pelucheRestockAt": 0
+    },
+    {
+      "id": "M0003",
+      "name": "nando",
+      "apiKey": "nk_8113bf718480b288976dd486c9d594be1dfe1101f593a9f6",
+      "location": "mall costanera",
+      "installer": "nando",
+      "image": "",
+      "created": "2026-06-15T03:48:25.660Z",
+      "lastSeen": null,
+      "status": "unknown",
+      "observations": [],
+      "counters": {
+        "coin1": {
+          "label": "Moneda 1",
+          "valuePerPulse": 500,
+          "enabled": true
+        },
+        "coin2": {
+          "label": "Moneda 2",
+          "valuePerPulse": 200,
+          "enabled": false
+        },
+        "bill": {
+          "label": "Billete",
+          "valuePerPulse": 1000,
+          "enabled": false
+        },
+        "win": {
+          "label": "Premio",
+          "valuePerPulse": 0,
+          "enabled": true
+        }
+      },
+      "initialCounters": {
+        "coin": 123122,
+        "out": 12
+      },
+      "counterHistory": [
+        {
+          "timestamp": "2026-06-15T03:48:25.660Z",
+          "user": "nando",
+          "coin": 123122,
+          "out": 12
+        }
+      ],
+      "digitalReadings": {
+        "coin1": 0,
+        "coin2": 0,
+        "bill": 0,
+        "win": 0
+      },
+      "pelucheMax": 20,
+      "creditValue": 500,
+      "pelucheRestockAt": 0
+    },
+    {
+      "id": "M0004",
+      "name": "122",
+      "apiKey": "nk_f2cff41d1300acefc2d26d7ca47e0b6b3f8f7459da5d2357",
+      "location": "mall costanera",
+      "installer": "nando",
+      "image": "",
+      "created": "2026-06-15T03:54:27.316Z",
+      "lastSeen": null,
+      "status": "unknown",
+      "observations": [],
+      "counters": {
+        "coin1": {
+          "label": "Moneda 1",
+          "valuePerPulse": 500,
+          "enabled": true
+        },
+        "coin2": {
+          "label": "Moneda 2",
+          "valuePerPulse": 200,
+          "enabled": false
+        },
+        "bill": {
+          "label": "Billete",
+          "valuePerPulse": 1000,
+          "enabled": false
+        },
+        "win": {
+          "label": "Premio",
+          "valuePerPulse": 0,
+          "enabled": true
+        }
+      },
+      "initialCounters": {
+        "coin": 10012,
+        "out": 12
+      },
+      "counterHistory": [
+        {
+          "timestamp": "2026-06-15T03:54:27.316Z",
+          "user": "nando",
+          "coin": 10012,
+          "out": 12
+        }
+      ],
+      "digitalReadings": {
+        "coin1": 0,
+        "coin2": 0,
+        "bill": 0,
+        "win": 0
+      },
+      "pelucheMax": 25,
+      "creditValue": 100,
+      "pelucheRestockAt": 0,
+      "ultimoCierre": {
+        "fecha": "2026-06-15T04:17:32.494Z",
+        "usuario": "nando",
+        "efectivo": 0,
+        "premios": 0,
+        "mp": 0,
+        "pesos": 0,
+        "counterCoin": 10090,
+        "counterOut": 90
+      }
+    }
+  ],
+  "revenue": [
+    {
+      "id": "R00001",
+      "machineId": "M0001",
+      "fecha": "2026-06-12",
+      "efectivo": 0,
+      "premios": 0,
+      "creditos": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-12T06:02:30.295Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00002",
+      "machineId": "M0001",
+      "fecha": "2026-06-13",
+      "efectivo": 0,
+      "premios": 0,
+      "creditos": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-13T05:33:41.435Z",
+      "observacion": "",
+      "digitalReadings": null,
+      "counterDeltas": null
+    },
+    {
+      "id": "R00003",
+      "machineId": "M0001",
+      "fecha": "2026-06-13",
+      "efectivo": 15,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 1500,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-13T06:11:13.127Z",
+      "observacion": "ok"
+    },
+    {
+      "id": "R00004",
+      "machineId": "M0001",
+      "fecha": "2026-06-13",
+      "efectivo": 15,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 1500,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-13T06:14:36.042Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00005",
+      "machineId": "M0001",
+      "fecha": "2026-06-13",
+      "efectivo": 15,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 1500,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-13T06:16:26.651Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00006",
+      "machineId": "M0001",
+      "fecha": "2026-06-13",
+      "efectivo": 15,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 1500,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-13T06:20:46.024Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00007",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 15,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 1500,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T06:02:08.268Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00008",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 15,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 1500,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T06:44:49.853Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00009",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T06:54:41.762Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00010",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 0,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T06:54:45.472Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00011",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T06:55:29.608Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00012",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T06:56:56.390Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00013",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T06:59:49.907Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00014",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T07:03:18.071Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00015",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T07:07:47.759Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00016",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T07:10:21.173Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00017",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T07:10:51.188Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00018",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T07:21:05.653Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00019",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 25,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T07:25:32.034Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00020",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 136,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T10:47:55.041Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00021",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 142,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T21:16:11.043Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00022",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 142,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T21:16:22.796Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00023",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 0,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-14T22:34:14.192Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00024",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 166,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T01:27:35.651Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00025",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 183,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T01:42:07.055Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00026",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 183,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T01:47:39.024Z",
+      "observacion": ""
+    },
+    {
+      "id": "R00027",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 183,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T02:16:08.398Z",
+      "observacion": "",
+      "restock": false
+    },
+    {
+      "id": "R00028",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 0,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T02:38:32.443Z",
+      "observacion": "",
+      "restock": true
+    },
+    {
+      "id": "R00029",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 0,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T02:44:28.773Z",
+      "observacion": "",
+      "restock": false
+    },
+    {
+      "id": "R00030",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 7940,
+      "premios": 11,
+      "mercadopago": 0,
+      "pesos": 7940,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T03:11:28.624Z",
+      "observacion": "",
+      "restock": true
+    },
+    {
+      "id": "R00031",
+      "machineId": "M0001",
+      "fecha": "2026-06-14",
+      "efectivo": 0,
+      "premios": 0,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T03:57:45.870Z",
+      "observacion": "",
+      "restock": false,
+      "counterCoin": 125422,
+      "counterOut": 2544
+    },
+    {
+      "id": "R00032",
+      "machineId": "M0004",
+      "fecha": "2026-06-15",
+      "efectivo": 0,
+      "premios": 0,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T04:03:17.782Z",
+      "observacion": "",
+      "restock": false,
+      "counterCoin": 10050,
+      "counterOut": 50
+    },
+    {
+      "id": "R00033",
+      "machineId": "M0004",
+      "fecha": "2026-06-15",
+      "efectivo": 0,
+      "premios": 0,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T04:07:12.267Z",
+      "observacion": "",
+      "restock": false,
+      "counterCoin": 10060,
+      "counterOut": 60
+    },
+    {
+      "id": "R00034",
+      "machineId": "M0004",
+      "fecha": "2026-06-15",
+      "efectivo": 0,
+      "premios": 0,
+      "mercadopago": 0,
+      "pesos": 0,
+      "cerradoPor": "nando",
+      "cerradoEn": "2026-06-15T04:17:32.494Z",
+      "observacion": "",
+      "restock": false,
+      "counterCoin": 10090,
+      "counterOut": 90
+    }
+  ],
+  "alarms": [
+    {
+      "machineId": "M0001",
+      "type": "peluches_bajos",
+      "message": "M0001 peluches bajos (0/30) — rellenar",
+      "triggeredAt": "2026-06-15T02:50:33.497Z",
+      "resolved": false
+    }
+  ],
+  "loginLog": [
+    {
+      "user": "carlos",
+      "time": "2026-06-15T05:17:42.941Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:17:25.858Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:17:10.796Z",
+      "ip": "::1"
+    },
+    {
+      "user": "carlos",
+      "time": "2026-06-15T05:15:20.968Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:15:04.117Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:12:26.574Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:10:55.031Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:09:14.178Z",
+      "ip": "::1"
+    },
+    {
+      "user": "carlos",
+      "time": "2026-06-15T05:08:49.994Z",
+      "ip": "::1"
+    },
+    {
+      "user": "carlos",
+      "time": "2026-06-15T05:08:36.932Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:08:14.692Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:08:03.172Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:06:00.214Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:06:00.011Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:05:59.799Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:05:59.587Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:05:59.395Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:05:59.203Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:05:58.982Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:05:58.514Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:35.566Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:35.374Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:35.191Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:34.988Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:34.807Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:34.427Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:26.096Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:25.885Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:25.682Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:25.431Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:04:24.564Z",
+      "ip": "::1"
+    },
+    {
+      "user": "carlos",
+      "time": "2026-06-15T05:01:49.893Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:01:38.329Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:01:38.122Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:01:37.940Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:01:37.738Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:01:36.600Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:01:36.399Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:01:36.164Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:01:31.425Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-15T05:01:30.848Z",
+      "ip": "::1"
+    }
+  ],
+  "mpToken": "APP_USR-647030560641415-061203-0b6fa7d4bbabe6344e88f6752e988a38-3468655764",
+  "mpPayments": [
+    {
+      "id": "MP00001",
+      "mpId": "3468655764-29612f18-8795-4cd2-aae7-aa404523b4e0",
+      "initPoint": "https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3468655764-29612f18-8795-4cd2-aae7-aa404523b4e0",
+      "machineId": "M0001",
+      "credits": 1,
+      "amount": 500,
+      "status": "pending",
+      "createdBy": "nando",
+      "createdAt": "2026-06-13T03:44:23.007Z",
+      "description": "Recarga de creditos"
+    },
+    {
+      "id": "MP00002",
+      "mpId": "3468655764-81a36223-8c03-48f0-a40d-b278490b7293",
+      "initPoint": "https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3468655764-81a36223-8c03-48f0-a40d-b278490b7293",
+      "machineId": "M0001",
+      "credits": 1,
+      "amount": 100,
+      "status": "pending",
+      "createdBy": "nando",
+      "createdAt": "2026-06-13T03:47:39.901Z",
+      "description": "Recarga de creditos"
+    },
+    {
+      "id": "MP00003",
+      "mpId": "3468655764-ed9d2698-758f-485e-b905-1f2e84685352",
+      "initPoint": "https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3468655764-ed9d2698-758f-485e-b905-1f2e84685352",
+      "machineId": "M0001",
+      "credits": 1,
+      "amount": 500,
+      "status": "pending",
+      "createdBy": "nando",
+      "createdAt": "2026-06-13T03:53:24.621Z",
+      "description": "Recarga de creditos"
+    },
+    {
+      "id": "MP00004",
+      "mpId": "3468655764-e4a88de7-6e9b-49ce-8b80-614a6a0372b9",
+      "initPoint": "https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3468655764-e4a88de7-6e9b-49ce-8b80-614a6a0372b9",
+      "machineId": "M0001",
+      "credits": 1,
+      "amount": 100,
+      "status": "pending",
+      "createdBy": "nando",
+      "createdAt": "2026-06-13T03:53:35.332Z",
+      "description": "Recarga de creditos"
+    },
+    {
+      "id": "MP00005",
+      "mpId": "3468655764-4eefb878-b337-4f20-b9f7-a151e615e7fc",
+      "initPoint": "https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3468655764-4eefb878-b337-4f20-b9f7-a151e615e7fc",
+      "machineId": "M0001",
+      "credits": 1,
+      "amount": 100,
+      "status": "pending",
+      "createdBy": "nando",
+      "createdAt": "2026-06-13T04:03:56.949Z",
+      "description": "Recarga de creditos"
+    },
+    {
+      "id": "MP00006",
+      "mpId": "3468655764-1c2690e4-da29-4732-bbfb-e316348f169f",
+      "initPoint": "https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3468655764-1c2690e4-da29-4732-bbfb-e316348f169f",
+      "machineId": "M0001",
+      "credits": 1,
+      "amount": 500,
+      "status": "pending",
+      "createdBy": "nando",
+      "createdAt": "2026-06-14T06:42:00.864Z",
+      "description": "Recarga de creditos"
+    },
+    {
+      "id": "MP00007",
+      "mpId": "3468655764-1a95c96e-fa80-49d8-b4e6-e7be187ff478",
+      "initPoint": "https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3468655764-1a95c96e-fa80-49d8-b4e6-e7be187ff478",
+      "machineId": "M0001",
+      "credits": 10,
+      "amount": 1000,
+      "status": "pending",
+      "createdBy": "nando",
+      "createdAt": "2026-06-14T06:43:11.142Z",
+      "description": "Recarga de creditos"
+    },
+    {
+      "id": "MP00008",
+      "mpId": "3468655764-da7aa9ff-90f1-45a2-a853-ba3dc4a7f35e",
+      "initPoint": "https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3468655764-da7aa9ff-90f1-45a2-a853-ba3dc4a7f35e",
+      "machineId": "M0001",
+      "credits": 10,
+      "amount": 1000,
+      "status": "pending",
+      "createdBy": "nando",
+      "createdAt": "2026-06-14T06:49:51.015Z",
+      "description": "Recarga de creditos"
+    },
+    {
+      "id": "MP00009",
+      "mpId": "3468655764-f189b922-b92f-4305-a5c1-eef6b72e50bf",
+      "initPoint": "https://www.mercadopago.cl/checkout/v1/redirect?pref_id=3468655764-f189b922-b92f-4305-a5c1-eef6b72e50bf",
+      "machineId": "M0001",
+      "credits": 1,
+      "amount": 500,
+      "status": "pending",
+      "createdBy": "nando",
+      "createdAt": "2026-06-14T22:03:15.401Z",
+      "description": "Recarga de creditos"
+    }
+  ]
+}

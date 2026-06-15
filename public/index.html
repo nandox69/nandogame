@@ -1,0 +1,2259 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nando Game v3 — Central</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/5.3.4/mqtt.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Rajdhani:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{--bg:#06080f;--surface:#0c0f1a;--card:#101426;--border:#1a2040;--np:#ff00ff;--nc:#00ffff;--ng:#00ff88;--ny:#ffee00;--nr:#ff2255;--text:#e0e8ff;--muted:#4a5580;--radius:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Rajdhani',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.07) 2px,rgba(0,0,0,.07) 4px);pointer-events:none;z-index:9999}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track:var(--bg)::-webkit-scrollbar-thumb{background:var(--np);border-radius:4px}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+.brand{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:24px}
+.brand-svg{width:88px;height:88px;filter:drop-shadow(0 0 12px rgba(255,0,255,.6))}
+@keyframes logoPulse{0%,100%{filter:drop-shadow(0 0 12px rgba(255,0,255,.6))}50%{filter:drop-shadow(0 0 20px rgba(255,0,255,.9))drop-shadow(0 0 30px rgba(0,255,255,.5))}}
+.brand-svg{animation:logoPulse 3s ease-in-out infinite}
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 0%,rgba(255,0,255,.1) 0%,transparent 65%),radial-gradient(ellipse at 50% 100%,rgba(0,255,255,.06) 0%,transparent 60%)}
+.login-box{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--np);border-radius:14px;padding:40px 36px 36px;box-shadow:0 0 50px rgba(255,0,255,.12)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--nc);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;text-shadow:0 0 6px var(--nc)}
+.field input,.field select{width:100%;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-size:14px;font-weight:500;font-family:'Rajdhani',sans-serif;outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--np);box-shadow:0 0 12px rgba(255,0,255,.2)}
+.field select option{background:var(--surface);color:var(--text)}
+.btn-neon{width:100%;padding:13px;background:transparent;border:2px solid var(--np);border-radius:var(--radius);color:var(--np);font-weight:700;font-size:14px;cursor:pointer;transition:all .2s;font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:2px;text-shadow:0 0 8px var(--np);box-shadow:0 0 12px rgba(255,0,255,.2);margin-top:6px}
+.btn-neon:hover{background:rgba(255,0,255,.15);box-shadow:0 0 24px rgba(255,0,255,.4)}
+.login-error{background:rgba(255,34,85,.1);border:1px solid rgba(255,34,85,.4);color:var(--nr);border-radius:var(--radius);padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+#app-screen{display:none;flex-direction:column;min-height:100vh}
+header{background:var(--surface);border-bottom:1px solid var(--np);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 20px rgba(255,0,255,.1);position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:8px}
+.hdr-info{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hdr-brand{display:flex;align-items:center;gap:8px}
+.hdr-brand svg{width:32px;height:32px}
+.hdr-title{font-size:13px;font-family:'Press Start 2P',monospace;color:var(--np);text-shadow:0 0 8px var(--np)}
+.hdr-role{font-size:10px;color:var(--nc);text-transform:uppercase;letter-spacing:2px;text-shadow:0 0 4px var(--nc)}
+.hdr-actions{display:flex;align-items:center;gap:8px}
+.hdr-user{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.hdr-user .av{width:28px;height:28px;border-radius:50%;border:2px solid var(--np);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:var(--np);text-shadow:0 0 4px var(--np)}
+.btn-out{background:none;border:1px solid var(--border);color:var(--muted);font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;transition:all .2s;font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:1px}
+.btn-out:hover{border-color:var(--nr);color:var(--nr)}
+main{flex:1;padding:16px;max-width:1200px;width:100%;margin:0 auto}
+.tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+.tab{padding:8px 18px;background:var(--card);border:1px solid var(--border);border-radius:8px 8px 0 0;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:1px;text-decoration:none}
+.tab:hover{border-color:rgba(0,255,255,.2);color:var(--text)}
+.tab.active{background:var(--surface);border-color:var(--nc);color:var(--nc);text-shadow:0 0 8px var(--nc);box-shadow:0 -2px 10px rgba(0,255,255,.1)}
+.panel{display:none}
+.panel.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:16px;position:relative;overflow:hidden;border:1px solid var(--border);transition:border-color .3s}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.stat-card.cyan::before{background:var(--nc);box-shadow:0 0 10px var(--nc)}
+.stat-card.green::before{background:var(--ng);box-shadow:0 0 10px var(--ng)}
+.stat-card.yellow::before{background:var(--ny);box-shadow:0 0 10px var(--ny)}
+.stat-card.pink::before{background:var(--np);box-shadow:0 0 10px var(--np)}
+.stat-card.red::before{background:var(--nr);box-shadow:0 0 10px var(--nr)}
+.stat-card.orange::before{background:#ff8800;box-shadow:0 0 10px #ff8800}
+.stat-icon{font-size:18px;margin-bottom:6px}
+.stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px}
+.stat-value{font-family:'Press Start 2P',monospace;font-size:18px;line-height:1.2}
+.stat-card.cyan .stat-value{color:var(--nc);text-shadow:0 0 12px var(--nc)}
+.stat-card.green .stat-value{color:var(--ng);text-shadow:0 0 12px var(--ng)}
+.stat-card.yellow .stat-value{color:var(--ny);text-shadow:0 0 12px var(--ny)}
+.stat-card.pink .stat-value{color:var(--np);text-shadow:0 0 12px var(--np)}
+.stat-card.red .stat-value{color:var(--nr);text-shadow:0 0 12px var(--nr)}
+.stat-sub{font-size:10px;color:var(--muted);margin-top:3px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:14px;overflow:hidden}
+.card-hdr{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px}
+.card-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--nc);text-shadow:0 0 6px var(--nc)}
+.card-body{padding:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);border-bottom:1px solid var(--border);font-weight:700}
+td{padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.04)}
+tr:hover td{background:rgba(0,255,255,.02)}
+.machine-row{cursor:pointer}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+.status-online{background:var(--ng);box-shadow:0 0 8px var(--ng)}
+.status-offline{background:var(--muted)}
+.status-alarm{background:var(--nr);box-shadow:0 0 8px var(--nr);animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.btn-sm{padding:5px 10px;background:rgba(0,255,255,.06);border:1px solid rgba(0,255,255,.2);border-radius:5px;color:var(--nc);font-size:11px;font-weight:600;cursor:pointer;font-family:'Rajdhani',sans-serif;transition:all .2s}
+.btn-sm:hover{background:rgba(0,255,255,.15);box-shadow:0 0 10px rgba(0,255,255,.2)}
+.btn-sm.danger{border-color:rgba(255,34,85,.3);color:var(--nr);background:rgba(255,34,85,.06)}
+.btn-sm.danger:hover{background:rgba(255,34,85,.15)}
+.btn-sm.green{border-color:rgba(0,255,136,.3);color:var(--ng);background:rgba(0,255,136,.06)}
+.btn-sm.green:hover{background:rgba(0,255,136,.15)}
+.btn-sm.yellow{border-color:rgba(255,238,0,.3);color:var(--ny);background:rgba(255,238,0,.06)}
+.btn-sm.yellow:hover{background:rgba(255,238,0,.15)}
+.btn-sm.orange{border-color:rgba(255,136,0,.3);color:#ff8800;background:rgba(255,136,0,.06)}
+.btn-sm.orange:hover{background:rgba(255,136,0,.15)}
+.btn-sm:disabled{opacity:.3;cursor:not-allowed}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:99999;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--nr);border-radius:12px;padding:24px;width:100%;max-width:420px;box-shadow:0 0 40px rgba(255,34,85,.2);max-height:90vh;overflow-y:auto}
+.modal.green{border-color:var(--ng);box-shadow:0 0 40px rgba(0,255,136,.2)}
+.modal.green h3{color:var(--ng);text-shadow:0 0 12px var(--ng)}
+.modal.cyan{border-color:var(--nc);box-shadow:0 0 40px rgba(0,255,255,.2)}
+.modal.cyan h3{color:var(--nc);text-shadow:0 0 12px var(--nc)}
+.modal.orange{border-color:#ff8800;box-shadow:0 0 40px rgba(255,136,0,.2)}
+.modal.orange h3{color:#ff8800;text-shadow:0 0 12px #ff8800}
+.modal.yellow{border-color:var(--ny);box-shadow:0 0 40px rgba(255,238,0,.2)}
+.modal.yellow h3{color:var(--ny);text-shadow:0 0 12px var(--ny)}
+.modal h3{font-family:'Press Start 2P',monospace;font-size:11px;color:var(--nr);text-shadow:0 0 10px var(--nr);margin-bottom:12px}
+.modal p{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.modal-actions{display:flex;gap:8px;margin-top:14px}
+.modal-actions .btn-sm{flex:1;padding:10px;text-align:center;font-size:12px}
+.modal .field{margin-bottom:10px}
+.modal .field label{font-size:9px}
+.modal .field input,.modal .field select,.modal .field textarea{padding:8px 10px;font-size:13px}
+.modal .field textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:'Rajdhani',sans-serif;outline:none;resize:vertical;min-height:50px}
+.modal .field textarea:focus{border-color:var(--nc)}
+.modal .field .input-group{display:flex;gap:6px}
+.modal .field .input-group input{flex:1}
+.empty-state{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+.api-key{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ny);word-break:break-all;background:var(--bg);padding:4px 8px;border-radius:4px;border:1px solid rgba(255,238,0,.15);display:inline-block;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.api-key:hover{max-width:none;white-space:normal}
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;z-index:9000;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:rgba(0,255,136,.15);border:1px solid var(--ng);color:var(--ng);box-shadow:0 0 20px rgba(0,255,136,.2)}
+.toast.bad{background:rgba(255,34,85,.15);border:1px solid var(--nr);color:var(--nr);box-shadow:0 0 20px rgba(255,34,85,.2)}
+.machine-detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+@media(max-width:700px){.machine-detail-grid{grid-template-columns:1fr}}
+.detail-field{}
+.detail-field label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:2px}
+.detail-field .val{font-size:13px;font-weight:600;color:var(--text)}
+.alarm-item{padding:10px 12px;border:1px solid rgba(255,34,85,.3);border-radius:6px;background:rgba(255,34,85,.04);margin-bottom:6px}
+.alarm-item .time{font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.alarm-item .msg{font-size:13px;font-weight:600;color:var(--nr);margin-top:4px}
+.alarm-item .machine{font-size:11px;color:var(--nc)}
+.log-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;flex-wrap:wrap;gap:4px;font-size:11px;color:var(--muted);border-bottom:1px solid rgba(255,255,255,.04)}
+.obs-item{padding:8px;border:1px solid var(--border);border-radius:6px;margin-bottom:6px;font-size:12px}
+.obs-item .meta{font-size:10px;color:var(--muted)}
+.revenue-total{font-family:'Press Start 2P',monospace;font-size:24px;color:var(--ng);text-shadow:0 0 16px var(--ng);text-align:center;padding:16px}
+.machine-list{max-height:400px;overflow-y:auto}
+.rec-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:12px;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.rec-date{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px}
+.rec-vals{display:flex;gap:10px;flex-wrap:wrap}
+.rec-val{display:flex;flex-direction:column;align-items:flex-end}
+.rec-val span:first-child{font-size:9px;color:var(--muted);text-transform:uppercase}
+.rec-val span:last-child{font-weight:700;font-size:12px}
+.rec-ef{color:var(--nc)}.rec-pr{color:var(--np)}.rec-cr{color:var(--ny)}.rec-pe{color:var(--ng)}
+.back-btn{padding:5px 12px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-size:11px;font-weight:600;cursor:pointer;font-family:'Rajdhani',sans-serif;transition:all .2s}
+.back-btn:hover{border-color:var(--nc);color:var(--nc)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:700px){.two-col{grid-template-columns:1fr}}
+.power-pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:20px;border:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);transition:all .3s}
+.power-pill.on{border-color:rgba(0,255,136,.4);color:var(--ng);box-shadow:0 0 10px rgba(0,255,136,.15)}
+.power-pill.off{border-color:rgba(255,34,85,.4);color:var(--nr);box-shadow:0 0 10px rgba(255,34,85,.1)}
+.power-pill.auto{border-color:rgba(0,255,255,.35);color:var(--nc);box-shadow:0 0 10px rgba(0,255,255,.12)}
+.power-pill.cycling{border-color:rgba(255,136,0,.4);color:#ff8800}
+.power-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.power-pill.on .power-dot{animation:blink 2s infinite}
+.mode-seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.mode-btn{padding:10px 6px;background:rgba(0,255,255,.04);border:1px solid rgba(0,255,255,.15);border-radius:8px;color:var(--muted);font-family:'Rajdhani',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;transition:all .2s;text-align:center}
+.mode-btn:hover{border-color:rgba(0,255,255,.35);color:var(--text)}
+.mode-btn.active-on{background:rgba(0,255,136,.12);border-color:rgba(0,255,136,.5);color:var(--ng);box-shadow:0 0 16px rgba(0,255,136,.2)}
+.mode-btn.active-off{background:rgba(255,34,85,.1);border-color:rgba(255,34,85,.45);color:var(--nr);box-shadow:0 0 16px rgba(255,34,85,.15)}
+.mode-btn.active-auto{background:rgba(0,255,255,.1);border-color:rgba(0,255,255,.45);color:var(--nc);box-shadow:0 0 16px rgba(0,255,255,.2)}
+.btn-cycle{width:100%;padding:10px;background:rgba(255,136,0,.08);border:2px solid rgba(255,136,0,.4);border-radius:8px;color:#ff8800;font-weight:700;font-size:12px;cursor:pointer;transition:all .2s;font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:1px}
+.btn-cycle:hover{background:rgba(255,136,0,.18);box-shadow:0 0 20px rgba(255,136,0,.25)}
+.btn-cycle:disabled{opacity:.35;cursor:not-allowed}
+.credit-btns{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.btn-credit{padding:10px 4px;background:rgba(0,255,255,.05);border:1px solid rgba(0,255,255,.2);border-radius:6px;color:var(--nc);font-family:'Press Start 2P',monospace;font-size:10px;cursor:pointer;transition:all .2s}
+.btn-credit:hover{background:rgba(0,255,255,.15);box-shadow:0 0 16px rgba(0,255,255,.3)}
+.btn-credit:disabled{opacity:.3;cursor:not-allowed}
+.custom-credit{display:flex;gap:8px;margin-bottom:10px}
+.custom-credit input{flex:1;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--ny);font-family:'Press Start 2P',monospace;font-size:13px;text-align:center;outline:none}
+.custom-credit input:focus{border-color:var(--ny);box-shadow:0 0 10px rgba(255,238,0,.2)}
+.btn-send{padding:8px 16px;background:rgba(255,238,0,.1);border:2px solid var(--ny);border-radius:6px;color:var(--ny);font-weight:700;font-size:11px;cursor:pointer;transition:all .2s;font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:1px;white-space:nowrap}
+.btn-send:hover{background:rgba(255,238,0,.2);box-shadow:0 0 20px rgba(255,238,0,.3)}
+.btn-send:disabled{opacity:.3;cursor:not-allowed}
+.sch-toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:8px}
+.sch-toggle-lbl{font-size:11px;font-weight:700;color:var(--text)}
+.sch-toggle-sub{font-size:9px;color:var(--muted)}
+.toggle-sw{position:relative;width:48px;height:26px;flex-shrink:0;cursor:pointer;display:block}
+.toggle-sw input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer;z-index:2}
+.toggle-track{display:block;position:relative;width:100%;height:100%;background:var(--border);border-radius:20px;transition:background .25s;pointer-events:none}
+.toggle-track::after{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:transform .25s,background .25s}
+.toggle-sw input:checked+.toggle-track{background:rgba(0,255,136,.25);border:1px solid rgba(0,255,136,.4)}
+.toggle-sw input:checked+.toggle-track::after{transform:translateX(22px);background:var(--ng);box-shadow:0 0 8px var(--ng)}
+.day-row{display:flex;gap:5px;margin-bottom:12px;flex-wrap:wrap}
+.day-chip{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;transition:all .2s;font-family:'Rajdhani',sans-serif;padding:0}
+.day-chip:hover{border-color:rgba(0,255,255,.3);color:var(--text)}
+.day-chip.on{background:rgba(0,255,255,.12);border-color:rgba(0,255,255,.45);color:var(--nc);box-shadow:0 0 10px rgba(0,255,255,.2)}
+.time-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.mtime-field label{display:block;font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.time-sel{flex:1;padding:8px 6px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--nc);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;cursor:pointer}
+.time-sel:focus{border-color:var(--nc);box-shadow:0 0 10px rgba(255,255,255,.15)}
+.time-sep{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--nc);font-weight:700}
+.btn-save-sch{width:100%;padding:10px;background:rgba(0,255,136,.08);border:2px solid rgba(0,255,136,.35);border-radius:8px;color:var(--ng);font-weight:700;font-size:12px;cursor:pointer;transition:all .2s;font-family:'Rajdhani',sans-serif;text-transform:uppercase;letter-spacing:1px}
+.btn-save-sch:hover{background:rgba(0,255,136,.15);box-shadow:0 0 20px rgba(0,255,136,.2)}
+.sch-preview{font-size:10px;color:var(--muted);margin-top:10px;padding:8px;background:rgba(0,255,255,.03);border:1px solid rgba(0,255,255,.1);border-radius:6px}
+.sch-preview strong{color:var(--nc)}
+.live-box{max-height:180px;overflow-y:auto}
+.live-line{display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px}
+.live-time{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:9px;flex-shrink:0}
+.live-icon{font-size:14px;flex-shrink:0}
+.live-msg{font-weight:600}
+.live-premio{color:var(--np)}.live-credito{color:var(--ny)}.live-power{color:#ff8800}.live-moneda{color:var(--nc)}
+</style></head><body>
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="logo-arcade" viewBox="0 0 100 100">
+    <rect x="8" y="55" width="84" height="32" rx="6" fill="#101426" stroke="#ff00ff" stroke-width="2"/>
+    <rect x="18" y="62" width="64" height="18" rx="3" fill="#06080f" stroke="#00ffff" stroke-width="1" opacity=".8"/>
+    <circle cx="35" cy="71" r="5" fill="#ff00ff"/><circle cx="50" cy="71" r="5" fill="#00ffff"/><circle cx="65" cy="71" r="5" fill="#ffee00"/>
+    <line x1="50" y1="55" x2="50" y2="38" stroke="#ff00ff" stroke-width="3"/>
+    <circle cx="50" cy="32" r="14" fill="#101426" stroke="#00ffff" stroke-width="2"/>
+    <circle cx="50" cy="32" r="6" fill="#ff00ff"/>
+    <rect x="44" y="18" width="12" height="8" rx="2" fill="#00ffff" opacity=".7"/>
+  </symbol>
+</svg>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="brand">
+      <svg class="brand-svg"><use href="#logo-arcade"/></svg>
+      <div style="text-align:center;line-height:1;margin-top:8px">
+        <div style="font-family:'Press Start 2P',monospace;font-size:22px;color:var(--np);text-shadow:0 0 20px var(--np);letter-spacing:2px">NANDO</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:22px;color:var(--nc);text-shadow:0 0 20px var(--nc);letter-spacing:4px;margin-top:6px">GAME</div>
+        <div style="font-size:10px;color:var(--muted);letter-spacing:4px;text-transform:uppercase;margin-top:8px">Central v3</div>
+      </div>
+    </div>
+    <div id="login-error" class="login-error"></div>
+    <div class="field"><label>Usuario</label><input id="luser" type="text" placeholder="nando" autocomplete="username"/></div>
+    <div class="field"><label>Contrasena</label><input id="lpass" type="password" placeholder="••••••••" autocomplete="current-password"/></div>
+    <button class="btn-neon" onclick="doLogin()">► INSERT COIN</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <header>
+    <div class="hdr-info">
+      <div class="hdr-brand">
+        <svg class="brand-svg"><use href="#logo-arcade"/></svg>
+        <div><span class="hdr-title">NANDO GAME</span><div class="hdr-role" id="hdr-role">Admin</div></div>
+      </div>
+    </div>
+    <div class="hdr-actions">
+      <span class="hdr-user" id="hdr-user"><span class="av" id="user-av">N</span><span id="user-name">nando</span></span>
+      <button class="btn-out" onclick="doLogout()">Salir</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- TABS -->
+    <div class="tabs" id="tabs">
+      <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">📊 ESTADISTICA</div>
+      <div class="tab" data-tab="machines" onclick="switchTab('machines')">🎰 Maquinas</div>
+      <div id="tab-revenue" class="tab" data-tab="revenue" onclick="switchTab('revenue')">💰 Recaudacion</div>
+      <div id="tab-alarms" class="tab" data-tab="alarms" onclick="switchTab('alarms')">🚨 Alarmas</div>
+      <div id="tab-users" class="tab" data-tab="users" onclick="switchTab('users')">👤 Usuarios</div>
+      <div id="tab-logs" class="tab" data-tab="logs" onclick="switchTab('logs')">📋 Accesos</div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div class="panel active" id="panel-dashboard">
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">🎰 Maquinas en linea</span></div>
+        <div class="card-body" id="dash-machines"></div>
+      </div>
+      <div class="card" id="dash-alarms-card" style="display:none">
+        <div class="card-hdr"><span class="card-title" style="color:var(--nr)">🚨 Alarmas activas</span></div>
+        <div class="card-body" id="dash-alarms"></div>
+      </div>
+    </div>
+
+    <!-- MACHINES -->
+    <div class="panel" id="panel-machines">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn-sm green" id="btn-new-machine" onclick="openNewMachine()">➕ Nueva Maquina</button>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Listado de maquinas</span><span id="machine-count" style="font-size:11px;color:var(--muted)">0</span></div>
+        <div class="card-body" style="padding:0">
+          <div id="machine-table-wrap"><div class="empty-state">No hay maquinas registradas</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REVENUE -->
+    <div class="panel" id="panel-revenue">
+      <div class="stats-grid">
+        <div class="stat-card green"><div class="stat-icon">💰</div><div class="stat-label">Total Recaudado</div><div class="stat-value" id="rev-total">$0</div></div>
+        <div class="stat-card cyan"><div class="stat-icon">📅</div><div class="stat-label">Recaudado Hoy</div><div class="stat-value" id="rev-hoy">$0</div></div>
+        <div class="stat-card yellow"><div class="stat-icon">🔄</div><div class="stat-label">Cierres Hoy</div><div class="stat-value" id="rev-count">0</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Historial de recaudacion</span><div style="display:flex;gap:6px"><button class="btn-sm green" id="btn-close-cash" onclick="openCloseCash()">💰 Recaudacion</button></div></div>
+        <div class="card-body" id="rev-list"><div class="empty-state">Sin registros</div></div>
+      </div>
+    </div>
+
+    <!-- ALARMS -->
+    <div class="panel" id="panel-alarms">
+      <div class="card">
+        <div class="card-hdr"><span class="card-title" style="color:var(--nr)">🚨 Alarmas activas</span></div>
+        <div class="card-body" id="alarms-list"><div class="empty-state">Sin alarmas activas</div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Historial de alarmas</span></div>
+        <div class="card-body" id="alarms-history"><div class="empty-state">Sin historial</div></div>
+      </div>
+    </div>
+
+    <!-- USERS -->
+    <div class="panel" id="panel-users">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn-sm green" onclick="openNewUser()">➕ Nuevo Usuario</button>
+        <button class="btn-sm orange" id="btn-change-pin" onclick="openChangePin()" style="display:none">🔑 Cambiar PIN Admin</button>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Usuarios del sistema</span></div>
+        <div class="card-body"><div id="users-list"></div></div>
+      </div>
+      <div class="card" id="mp-config-card" style="display:none">
+        <div class="card-hdr"><span class="card-title">💰 Mercado Pago</span></div>
+        <div class="card-body">
+          <div class="field"><label>Access Token (produccion)</label>
+            <input id="mp-token-input" type="password" placeholder="APP_USR-xxxxxxxx"/>
+            <div style="margin-top:6px;display:flex;gap:6px">
+              <button class="btn-sm green" onclick="saveMPToken()">Guardar</button>
+              <button class="btn-sm" onclick="document.getElementById('mp-token-input').type=document.getElementById('mp-token-input').type==='password'?'text':'password'">👁 Mostrar</button>
+            </div>
+            <div id="mp-token-status" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
+          </div>
+          <details style="margin-top:10px;background:var(--bg2);border-radius:6px;padding:10px">
+            <summary style="cursor:pointer;font-size:11px;color:var(--muted)">📋 Como obtener tu Access Token</summary>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px;line-height:1.6">
+              1. Andá a <a href="https://www.mercadopago.com.ar/developers" target="_blank" style="color:var(--nc)">developers.mercadopago.com</a><br>
+              2. Creá una aplicacion → <strong>Credenciales</strong><br>
+              3. Copiá el <strong>Access Token</strong> de produccion (APP_USR-...)<br>
+              4. Pegalo aca y guardalo
+            </div>
+          </details>
+          <div style="margin-top:10px">
+            <label style="font-size:11px;color:var(--muted)">Pagos realizados</label>
+            <div id="mp-payments-list"><div class="empty-state">Sin pagos</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="panel" id="panel-logs">
+      <div style="display:flex;gap:6px;margin-bottom:12px">
+        <button class="btn-sm danger" onclick="clearLoginLog()">🗑 Limpiar historial</button>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">Historial de accesos</span></div>
+        <div class="card-body" id="logs-list"><div class="empty-state">Sin registros</div></div>
+      </div>
+    </div>
+
+    <!-- MACHINE DETAIL VIEW -->
+    <div class="panel" id="panel-machinedetail">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="back-btn" onclick="exitMachineDetail()">← Volver</button>
+        <span style="font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted)">Gestionando:</span>
+        <strong id="mdetail-name" style="font-size:15px;color:var(--text)"></strong>
+        <span id="mdetail-id" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--nc)"></span>
+        <span id="mdetail-powerpill" class="power-pill"><span class="power-dot"></span><span id="mdetail-powertxt">--</span></span>
+      </div>
+      <!-- Stats -->
+      <div class="stats-grid" id="mdetail-stats"></div>
+      <div class="two-col">
+        <!-- Power + Schedule -->
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">⚡ Alimentacion</span></div>
+          <div class="card-body">
+            <div class="mode-seg">
+              <button class="mode-btn" id="md-mode-on" onclick="mdSetPower('on')"><span style="display:block;font-size:16px;margin-bottom:4px">🟢</span>ON</button>
+              <button class="mode-btn" id="md-mode-off" onclick="mdSetPower('off')"><span style="display:block;font-size:16px;margin-bottom:4px">🔴</span>OFF</button>
+              <button class="mode-btn" id="md-mode-auto" onclick="mdSetPower('auto')"><span style="display:block;font-size:16px;margin-bottom:4px">⏰</span>AUTO</button>
+            </div>
+            <button class="btn-cycle" onclick="mdPowerCycle()">⚡ Reset Maquina</button>
+            <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+              <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Rele al reves?</div>
+              <button class="btn-cycle" style="border-color:rgba(0,255,255,.35);color:var(--nc);background:rgba(0,255,255,.06)" onclick="mdToggleRelay()">🔄 Invertir polaridad</button>
+              <div id="md-relay-label" style="font-size:9px;color:var(--muted);margin-top:4px">Polaridad: LOW activa</div>
+            </div>
+            <div id="md-esp-status" style="font-size:9px;color:var(--muted);margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">⏰ Horario</span></div>
+          <div class="card-body">
+            <div class="sch-toggle-row">
+              <div><div class="sch-toggle-lbl">Activar horario</div><div class="sch-toggle-sub">Enciende/apaga segun horario</div></div>
+              <label class="toggle-sw"><input type="checkbox" id="md-sch-active" onchange="mdMarkScheduleDirty()"><span class="toggle-track"></span></label>
+            </div>
+            <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Dias</div>
+            <div class="day-row">
+              <button class="day-chip" data-w="1" onclick="mdToggleDay(this)">L</button>
+              <button class="day-chip" data-w="2" onclick="mdToggleDay(this)">M</button>
+              <button class="day-chip" data-w="3" onclick="mdToggleDay(this)">M</button>
+              <button class="day-chip" data-w="4" onclick="mdToggleDay(this)">J</button>
+              <button class="day-chip" data-w="5" onclick="mdToggleDay(this)">V</button>
+              <button class="day-chip" data-w="6" onclick="mdToggleDay(this)">S</button>
+              <button class="day-chip" data-w="0" onclick="mdToggleDay(this)">D</button>
+            </div>
+            <div class="time-row">
+              <div class="mtime-field">
+                <label>Encender</label>
+                <div style="display:flex;align-items:center;gap:4px">
+                  <select id="md-sch-on-h" class="time-sel" onchange="mdMarkScheduleDirty()"></select>
+                  <span class="time-sep">:</span>
+                  <select id="md-sch-on-m" class="time-sel" onchange="mdMarkScheduleDirty()"></select>
+                </div>
+              </div>
+              <div class="mtime-field">
+                <label>Apagar</label>
+                <div style="display:flex;align-items:center;gap:4px">
+                  <select id="md-sch-off-h" class="time-sel" onchange="mdMarkScheduleDirty()"></select>
+                  <span class="time-sep">:</span>
+                  <select id="md-sch-off-m" class="time-sel" onchange="mdMarkScheduleDirty()"></select>
+                </div>
+              </div>
+            </div>
+            <button class="btn-save-sch" onclick="mdSaveSchedule()">💾 Guardar Horario</button>
+            <div class="sch-preview" id="md-sch-preview">Configura y guarda.</div>
+          </div>
+        </div>
+      </div>
+      <div class="two-col">
+        <!-- Credits -->
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">🎮 Enviar Creditos</span></div>
+          <div class="card-body">
+            <div class="credit-btns">
+              <button class="btn-credit" onclick="mdSendCredits(1)">+1</button>
+              <button class="btn-credit" onclick="mdSendCredits(3)">+3</button>
+              <button class="btn-credit" onclick="mdSendCredits(5)">+5</button>
+              <button class="btn-credit" onclick="mdSendCredits(10)">+10</button>
+            </div>
+            <div class="custom-credit">
+              <input id="md-credit-input" type="number" min="1" max="50" value="1"/>
+              <button class="btn-send" onclick="mdSendCustom()">► Enviar</button>
+            </div>
+            <div id="md-credit-fb" style="font-size:11px;font-weight:600;text-align:center;color:var(--ng);min-height:16px;margin-top:6px"></div>
+            <div id="md-mp-section" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
+              <button class="btn-send" style="background:rgba(0,200,255,.1);border-color:var(--nc)" onclick="mdOpenMPPay()">💰 Cobrar con Mercado Pago</button>
+              <div id="md-mp-status" style="font-size:10px;color:var(--muted);margin-top:4px"></div>
+              <div id="md-mp-qr" style="margin-top:8px;text-align:center"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Live Activity -->
+        <div class="card">
+          <div class="card-hdr"><span class="card-title">📡 Actividad en vivo</span></div>
+          <div class="card-body">
+            <div class="live-box" id="md-live"><div class="empty-state">Esperando datos...</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">💰 Pagos Mercado Pago</span></div>
+        <div class="card-body" id="md-mp-payments"><div class="empty-state">Sin pagos</div></div>
+      </div>
+      <!-- Observations + API Key -->
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">📝 Observaciones</span></div>
+        <div class="card-body" id="md-obs"></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">🔑 API Key</span></div>
+        <div class="card-body">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ny);word-break:break-all" id="md-apikey"></div>
+          <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn-sm yellow" onclick="mdCopyKey()">Copiar</button>
+            <button class="btn-sm danger" onclick="mdRegenKey()">🔑 Regenerar (pedir PIN)</button>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><span class="card-title">📟 CONTADORES INICIAL</span></div>
+        <div class="card-body" id="md-counters"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL MACHINE -->
+<div class="modal-overlay" id="modal-machine">
+  <div class="modal cyan">
+    <h3 id="machine-modal-title">🎰 Nueva Maquina</h3>
+    <div class="field"><label>Nombre de la maquina</label><input id="m-name" type="text" placeholder="Ej: Peluche Centro"/></div>
+    <div class="field"><label>Ubicacion</label><input id="m-location" type="text" placeholder="Ej: Local 12, Mall Centro"/></div>
+    <div class="field"><label>Instalador</label><input id="m-installer" type="text" placeholder="Ej: Carlos"/></div>
+    <div class="field"><label>Modelo de maquina</label>
+      <select id="m-image" style="width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);background:var(--card);color:var(--nt);font-size:14px" onchange="previewMachineModel()">
+        <option value="">Seleccionar...</option>
+        <option value="MINI DOLL">MINI DOLL</option>
+        <option value="DOBLE ROSADA A">DOBLE ROSADA A</option>
+        <option value="DOBLE ROSADA B">DOBLE ROSADA B</option>
+        <option value="DOBLE CUT A">DOBLE CUT A</option>
+        <option value="DOBLE CUT B">DOBLE CUT B</option>
+        <option value="SHINING">SHINING</option>
+        <option value="SHINING GRANDE">SHINING GRANDE</option>
+        <option value="CHINA LED NUEVAS">CHINA LED NUEVAS</option>
+        <option value="CHINA USADA">CHINA USADA</option>
+        <option value="CHINA CHICAS">CHINA CHICAS</option>
+      </select>
+      <div id="m-image-preview" style="font-size:12px;font-weight:600;color:var(--nc);margin-top:4px"></div>
+    </div>
+    <div class="field"><label>Capacidad maxima de peluches</label><input id="m-peluche-max" type="number" min="0" placeholder="Ej: 30" style="color:var(--ny)"/></div>
+    <div class="field"><label>Valor del credito ($)</label><input id="m-credit-value" type="number" min="0" placeholder="Ej: 500" style="color:var(--ng)"/></div>
+    <div style="margin-top:14px;background:var(--bg2);border-radius:8px;padding:14px;border:1px solid var(--border)">
+      <div style="font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--ny);margin-bottom:10px">📟 Contadores iniciales (respaldo)</div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div class="field" style="flex:1;min-width:120px"><label>Coin 1 (moneda)</label><input id="m-init-coin" type="number" min="0" placeholder="0" style="font-size:16px;font-weight:700;color:var(--nc)"/></div>
+        <div class="field" style="flex:1;min-width:120px"><label>Out (premio)</label><input id="m-init-out" type="number" min="0" placeholder="0" style="font-size:16px;font-weight:700;color:var(--np)"/></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:6px">Estos valores no se usan en calculos, solo como respaldo visual. <strong style="color:var(--nr)">No se podran modificar despues de crear la maquina</strong> (excepto Nando).</div>
+    </div>
+    <div id="machine-api-section" style="display:none">
+      <div class="field"><label>ID de maquina</label><div style="font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--nc)" id="m-show-id"></div></div>
+      <div class="field"><label>API Key</label><div class="input-group"><input id="m-show-apikey" type="text" readonly/><button class="btn-sm yellow" onclick="copyApiKey()">Copiar</button></div></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('modal-machine')">Cancelar</button>
+      <button class="btn-sm green" id="btn-save-machine" onclick="saveMachine()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL MACHINE DETAIL -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <h3 id="detail-title">Maquina</h3>
+    <div id="detail-content"></div>
+    <div class="modal-actions" id="detail-actions">
+      <button class="btn-sm" onclick="closeModal('modal-detail')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REVENUE -->
+<div class="modal-overlay" id="modal-revenue">
+  <div class="modal green">
+    <h3>💰 Recaudacion</h3>
+    <div class="field"><label>Maquina</label><select id="rev-machine"></select></div>
+    <div class="field"><label>Efectivo ($)</label><input id="rev-efectivo" type="number" min="0" value="0" readonly style="color:var(--ng);font-weight:600"/></div>
+    <div class="field"><label>Mercado Pago ($)</label><input id="rev-mp" type="number" min="0" value="0" readonly style="color:var(--np)"/><div style="font-size:10px;color:var(--muted)">Pagos aprobados de esta maquina: <strong id="rev-mp-count">0</strong></div>
+    <div class="field"><label>Premios entregados</label><input id="rev-premios" type="number" min="0" value="0" readonly style="color:var(--np)"/></div>
+    <div class="field" id="rev-peluche-stock-row" style="display:none"><label>Stock peluches</label><input id="rev-peluche-stock" type="text" readonly style="color:var(--ny);font-weight:600"/></div>
+    <div style="margin-top:10px;padding:10px;background:var(--bg2);border-radius:6px;border:1px solid var(--border)">
+      <div style="font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--ny);margin-bottom:6px">📟 CONTADORES INICIAL</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div class="field" style="flex:1;min-width:100px;margin-bottom:0"><label>Coin 1</label><input id="rev-counter-coin" type="number" min="0" value="0" style="font-size:16px;font-weight:700;color:var(--nc)"/></div>
+        <div class="field" style="flex:1;min-width:100px;margin-bottom:0"><label>Out</label><input id="rev-counter-out" type="number" min="0" value="0" style="font-size:16px;font-weight:700;color:var(--np)"/></div>
+      </div>
+    </div>
+    <div class="field"><label>Total recaudado ($)</label><input id="rev-pesos" type="number" min="0" value="0" readonly style="font-weight:700;color:var(--ng)"/></div>
+    <div class="field"><label>Observacion</label><textarea id="rev-obs" placeholder="Opcional"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('modal-revenue')">Cancelar</button>
+      <button class="btn-sm green" onclick="confirmRevenue()">Guardar Cierre</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL OBSERVATION -->
+<!-- MODAL USER -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal cyan">
+    <h3>👤 Nuevo Usuario</h3>
+    <div class="field"><label>Nombre de usuario</label><input id="u-name" type="text" placeholder="Ej: tecnico1"/></div>
+    <div class="field"><label>Nombre real (opcional)</label><input id="u-realname" type="text" placeholder="Ej: Juan Perez"/></div>
+    <div class="field"><label>Contrasena</label><input id="u-pass" type="password" placeholder="••••••"/></div>
+    <div class="field"><label>Rol</label><select id="u-role"><option value="admin">Admin</option><option value="recaudador">Recaudador</option><option value="tecnico">Tecnico</option></select></div>
+    <div class="field" id="u-trial-field"><label>Dias de prueba (0 = ilimitado)</label><input id="u-trial" type="number" min="0" value="7"/></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('modal-user')">Cancelar</button>
+      <button class="btn-sm green" onclick="saveUser()">Crear</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRM -->
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal orange">
+    <h3 id="confirm-title">⚠ Confirmar</h3>
+    <p id="confirm-msg">Esta accion no se puede deshacer.</p>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('modal-confirm')">Cancelar</button>
+      <button class="btn-sm danger" id="confirm-btn" onclick="">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALERT -->
+<div class="modal-overlay" id="modal-alert">
+  <div class="modal yellow">
+    <h3 id="alert-title">📢 Aviso</h3>
+    <p id="alert-msg"></p>
+    <div class="modal-actions"><button class="btn-sm" onclick="closeModal('modal-alert')">Cerrar</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-custom">
+  <div class="modal" id="modal-custom-inner">
+    <h3 id="custom-modal-title"></h3>
+    <div id="custom-modal-body"></div>
+    <div class="modal-actions" id="custom-modal-actions"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- MODAL PIN -->
+<div class="modal-overlay" id="modal-pin">
+  <div class="modal orange">
+    <h3 id="pin-title">🔑 Ingresa el PIN de Nando</h3>
+    <p id="pin-msg" style="font-size:12px;margin-bottom:10px">Operacion restringida. Solicita el PIN al administrador.</p>
+    <div class="field"><input id="pin-input" type="password" placeholder="PIN" style="text-align:center;font-size:16px;font-weight:700"/></div>
+    <div class="modal-actions">
+      <button class="btn-sm" id="pin-cancel-btn">Cancelar</button>
+      <button class="btn-sm green" id="pin-confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CHANGE PIN (admin only) -->
+<div class="modal-overlay" id="modal-changepin">
+  <div class="modal orange">
+    <h3>🔑 Cambiar PIN de administrador</h3>
+    <div class="field"><label>PIN actual</label><input id="cp-current" type="password" placeholder="PIN actual"/></div>
+    <div class="field"><label>Nuevo PIN (min 4 caracteres)</label><input id="cp-new" type="password" placeholder="Nuevo PIN"/></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal('modal-changepin')">Cancelar</button>
+      <button class="btn-sm green" onclick="changeAdminPin()">Cambiar PIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DISCLAIMER -->
+<div class="modal-overlay" id="modal-disclaimer">
+  <div class="modal" style="max-width:650px;max-height:85vh;overflow-y:auto;padding:28px">
+    <h3 style="text-align:center;color:var(--nc);margin-bottom:16px">Bienvenido a Nando Game</h3>
+    <div style="font-size:13px;line-height:1.7;color:var(--text);margin-bottom:16px">
+      <p>Estimado usuario,</p>
+      <p>Le damos la bienvenida a la plataforma web de Nando Game. Este sitio se encuentra actualmente en fase activa de desarrollo, por lo que su acceso est&aacute; destinado exclusivamente a pruebas y evaluaci&oacute;n de rendimiento.</p>
+      <p>Al interactuar con nuestra interfaz web, usted acepta las siguientes condiciones de seguridad y uso leg&iacute;timo:</p>
+      <p><strong>Pol&iacute;tica de Uso y Sanciones</strong><br>
+      El sistema debe utilizarse &uacute;nicamente para los fines de prueba asignados. Cualquier intento de alteraci&oacute;n del c&oacute;digo, inyecci&oacute;n de scripts, explotaci&oacute;n de fallos o mal uso de las herramientas web resultar&aacute; en la suspensi&oacute;n inmediata y el bloqueo permanente de su usuario y credenciales de acceso.</p>
+      <p><strong>Registro de Actividad y Auditor&iacute;a Web</strong><br>
+      Para garantizar la integridad del servidor, toda la navegaci&oacute;n y actividad dentro de esta web est&aacute; siendo estrictamente monitoreada. Nuestra base de datos registra de forma automatizada:</p>
+      <p>Direcci&oacute;n IP de origen y geolocalizaci&oacute;n de red.<br>
+      Informaci&oacute;n del dispositivo (Navegador web, sistema operativo y resoluci&oacute;n).<br>
+      Tiempo de uso (Duraci&oacute;n de la sesi&oacute;n, marcas de tiempo de entrada y salida).<br>
+      Modificaciones del sistema (Cualquier cambio de datos, peticiones HTTP o alteraci&oacute;n en la base de datos).</p>
+      <p><strong>Declaraci&oacute;n de Consentimiento:</strong> Al hacer clic en &quot;Entendido y Aceptar&quot;, usted declara estar en pleno conocimiento de estos t&eacute;rminos y autoriza el registro de los datos antes mencionados para fines de auditor&iacute;a t&eacute;cnica.</p>
+      <p>Agradecemos su colaboraci&oacute;n para mantener un entorno de desarrollo seguro.</p>
+      <p style="text-align:center;color:var(--muted);font-size:12px">Direcci&oacute;n de Soporte y Ciberseguridad Nando Game Web Project</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn green" id="disclaimer-accept-btn" style="width:100%;padding:12px;font-size:16px">Entendido y Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '/api';
+let TOKEN = localStorage.getItem('ng_token');
+let USER = null;
+let machines = [];
+let mqttClient = null;
+
+function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (TOKEN) headers['Authorization'] = 'Bearer ' + TOKEN;
+  return fetch(API + path, { ...opts, headers }).then(r => {
+    if (r.status === 401) { localStorage.removeItem('ng_token'); location.reload(); throw new Error('Sesion expirada'); }
+    return r.json().then(d => { if (d.error) throw new Error(d.error); return d; });
+  });
+}
+
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function showToast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast ' + type + ' show';
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id === 'modal-revenue') {
+    const rev = document.getElementById('modal-revenue');
+    // Restore source modal content if it was saved
+    if (rev._sourceId) {
+      const src = document.getElementById(rev._sourceId);
+      if (src && src._savedHTML !== undefined) {
+        src.querySelector('.modal').innerHTML = src._savedHTML;
+        src._savedHTML = undefined;
+      }
+      rev._sourceId = null;
+    }
+    if (rev._origHTML) { rev.querySelector('.modal').innerHTML = rev._origHTML; rev._origHTML = null; }
+  }
+}
+
+function restoreModalRevenue() {
+  const rev = document.getElementById('modal-revenue');
+  if (rev) {
+    if (rev._origHTML) { rev.querySelector('.modal').innerHTML = rev._origHTML; rev._origHTML = null; }
+  }
+  closeModal('modal-revenue');
+}
+
+function openModal(id) {
+  if (id !== 'modal-revenue' && id !== 'modal-detail') {
+    const src = document.getElementById(id);
+    if (src) {
+      const rev = document.getElementById('modal-revenue');
+      if (!rev._origHTML) rev._origHTML = rev.querySelector('.modal').innerHTML;
+      let html = src.querySelector('.modal').innerHTML;
+      // Save source content so it can be restored on close
+      src._savedHTML = html;
+      src.querySelector('.modal').innerHTML = ''; // prevent DOM ID conflicts
+      html = html.replace(new RegExp("closeModal\\('" + id + "'\\)", 'g'), "closeModal('modal-revenue')");
+      rev.querySelector('.modal').innerHTML = html;
+      rev.querySelector('.modal').className = src.querySelector('.modal').className;
+      rev._sourceId = id;
+      id = 'modal-revenue';
+    }
+  }
+  document.getElementById(id).classList.add('open');
+}
+
+function openCustomModal(title, bodyHtml, buttons) {
+  const rev = document.getElementById('modal-revenue');
+  const revInner = rev.querySelector('.modal');
+  if (!rev._origHTML) rev._origHTML = revInner.innerHTML;
+  revInner.className = 'modal';
+  const btnHtml = buttons.map((b,i) => `<button class="btn-sm ${b.cls||''}" id="cbtn-${i}">${b.text}</button>`).join('');
+  revInner.innerHTML = `<h3>${title}</h3><div>${bodyHtml}</div><div class="modal-actions">${btnHtml}</div>`;
+  revInner.querySelectorAll('[id^="cbtn-"]').forEach((btn, i) => { btn.onclick = buttons[i].fn; });
+  openModal('modal-revenue');
+}
+
+function closeCustomModal() {
+  const rev = document.getElementById('modal-revenue');
+  if (rev._origHTML) rev.querySelector('.modal').innerHTML = rev._origHTML;
+  closeModal('modal-revenue');
+}
+
+// AUTH
+function doLogin() {
+  const username = document.getElementById('luser').value.trim().toLowerCase();
+  const password = document.getElementById('lpass').value;
+  if (!username || !password) return showLoginError('Ingresa usuario y contrasena.');
+  fetch(API + '/login', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({username,password}) })
+    .then(r => r.json()).then(d => {
+      if (d.error) { showLoginError(d.error); return; }
+      TOKEN = d.token; localStorage.setItem('ng_token', TOKEN);
+      USER = d.user; startApp();
+    }).catch(e => showLoginError('Error de conexion: ' + e.message));
+}
+
+function showLoginError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function startApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'flex';
+  document.getElementById('user-av').textContent = (USER.name||USER.username).charAt(0).toUpperCase();
+  document.getElementById('user-name').textContent = USER.name || USER.username;
+  document.getElementById('hdr-role').textContent = USER.role;
+  initUI();
+  loadData();
+  connectMQTT();
+  if (window._pollInterval) clearInterval(window._pollInterval);
+  window._pollInterval = setInterval(() => { loadMachines(); loadRevenueSummary(); }, 15000);
+  // Disclaimer modal despues de cargar todo
+  document.getElementById('modal-disclaimer').style.display = 'flex';
+  document.getElementById('disclaimer-accept-btn').onclick = function() {
+    document.getElementById('modal-disclaimer').style.display = 'none';
+  };
+}
+
+function doLogout() {
+  if (mqttClient) mqttClient.end(true);
+  if (window._pollInterval) clearInterval(window._pollInterval);
+  TOKEN = null; USER = null; localStorage.removeItem('ng_token');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display = 'none';
+}
+
+// UI
+function initUI() {
+  // Tabs visibles segun rol
+  const role = USER.role;
+  document.getElementById('tab-users').style.display = role === 'admin' ? '' : 'none';
+  document.getElementById('tab-logs').style.display = role === 'admin' ? '' : 'none';
+  document.getElementById('tab-alarms').style.display = role === 'admin' ? '' : 'none';
+  document.getElementById('btn-new-machine').style.display = (role === 'admin' || role === 'tecnico') ? '' : 'none';
+  document.getElementById('btn-close-cash').style.display = (role === 'admin' || role === 'recaudador') ? '' : 'none';
+  document.getElementById('tab-revenue').style.display = (role === 'admin' || role === 'recaudador') ? '' : 'none';
+  document.getElementById('btn-change-pin').style.display = role === 'admin' ? '' : 'none';
+  // Enter en login
+  ['luser','lpass'].forEach(id => document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); }));
+  // Modal close on overlay click
+  document.querySelectorAll('.modal-overlay:not(#modal-disclaimer)').forEach(el => el.addEventListener('click', function(e) { if(e.target===this) this.classList.remove('open'); }));
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const tab = document.querySelector('.tab[data-tab="'+name+'"]');
+  if (tab) tab.classList.add('active');
+  const panel = document.getElementById('panel-'+name);
+  if (panel) panel.classList.add('active');
+  if (name === 'machines') renderMachines();
+  if (name === 'revenue') { loadRevenue(); renderRevenue(); }
+  if (name === 'alarms') loadAlarms();
+  if (name === 'users') { loadUsers(); loadMPConfig(); }
+  if (name === 'logs') loadLoginLog();
+}
+
+function loadData() {
+  loadMachines();
+  loadRevenueSummary();
+}
+
+// MACHINES
+function loadMachines() {
+  api('/machines').then(data => {
+    // Preservar campos dinamicos (_powerMode, schedule, etc) del array anterior
+    const oldMap = {};
+    machines.forEach(m => { oldMap[m.id] = m; });
+    data.forEach(m => {
+      const old = oldMap[m.id];
+      if (old) {
+        m._powerMode = old._powerMode;
+        m._powerModeAt = old._powerModeAt;
+        m._powerStatus = old._powerStatus;
+        m._powerCycling = old._powerCycling;
+        m._scheduleActive = old._scheduleActive;
+        m._scheduleDays = old._scheduleDays;
+        m._scheduleOnH = old._scheduleOnH;
+        m._scheduleOnM = old._scheduleOnM;
+        m._scheduleOffH = old._scheduleOffH;
+        m._scheduleOffM = old._scheduleOffM;
+        m._relayActiveLow = old._relayActiveLow;
+        m._scheduleDirty = old._mdScheduleDirty;
+        m._monedaAtClose = old._monedaAtClose;
+        m._premioAtClose = old._premioAtClose;
+        m._lastMonedaValue = old._lastMonedaValue;
+        m._lastPremioValue = old._lastPremioValue;
+        m.creditsSent = old.creditsSent;
+        m.ultimasMonedas = old.ultimasMonedas;
+        m.ultimosPremios = old.ultimosPremios;
+        m.rssi = old.rssi;
+        m.status = old.status;
+        m.lastSeen = old.lastSeen;
+      }
+    });
+    machines = data;
+    // No usar valores de ultimasMonedas/ultimosPremios del server (son obsoletos)
+    machines.forEach(m => {
+      if (!oldMap[m.id]) { m.ultimasMonedas = 0; m.ultimosPremios = 0; }
+      const saved = localStorage.getItem('mc_' + m.id);
+      if (saved) {
+        try { const p = JSON.parse(saved); m._monedaAtClose = p.at; } catch {}
+      }
+      const savedP = localStorage.getItem('pc_' + m.id);
+      if (savedP) {
+        try { const p = JSON.parse(savedP); m._premioAtClose = p.at; } catch {}
+      }
+    });
+    renderDashboard();
+    renderMachines();
+    if (_mdMachineId) {
+      const m = machines.find(x => x.id === _mdMachineId);
+      if (m) { renderMDStats(m); renderMDCounters(m); renderMDMPPayments(m); renderMDObs(m); updateMDPowerPill(m); loadMDSchedule(m); }
+    }
+  }).catch(() => {});
+}
+
+function renderMachines() {
+  const wrap = document.getElementById('machine-table-wrap');
+  document.getElementById('machine-count').textContent = machines.length + ' maquina(s)';
+  if (!machines.length) { wrap.innerHTML = '<div class="empty-state">No hay maquinas registradas</div>'; return; }
+  wrap.innerHTML = `<table><thead><tr><th>Estado</th><th>ID</th><th>Nombre</th><th>Ubicacion</th><th>Ultima vez</th><th style="text-align:right">Acciones</th></tr></thead><tbody>
+    ${machines.map(m => {
+      const status = m.status === 'alarm' ? 'alarm' : (m.status === 'online' ? 'online' : 'offline');
+      const lastSeen = m.lastSeen ? new Date(m.lastSeen).toLocaleString('es-CL') : 'Nunca';
+      const role = USER.role;
+      return `<tr class="machine-row" onclick="enterMachineDetail('${m.id}')">
+        <td><span class="status-dot status-${status}"></span><span style="text-transform:uppercase;font-size:11px">${status}</span></td>
+        <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--nc)">${esc(m.id)}</td>
+        <td><strong>${esc(m.name)}</strong></td>
+        <td style="color:var(--muted);font-size:12px">${esc(m.location||'-')}</td>
+        <td style="font-size:11px;color:var(--muted)">${lastSeen}</td>
+        <td style="text-align:right" onclick="event.stopPropagation()">
+          <button class="btn-sm" onclick="event.stopPropagation();showMachineDetail('${m.id}')" title="Ver detalle">ℹ</button>
+          ${(role==='admin'||role==='tecnico') ? `<button class="btn-sm yellow" onclick="event.stopPropagation();regenKey('${m.id}')" title="Regenerar API Key">🔑</button>` : ''}
+          ${(role==='admin'||role==='tecnico') ? `<button class="btn-sm" onclick="event.stopPropagation();openObservation('${m.id}')" title="Agregar observacion">📝</button>` : ''}
+          ${role==='admin' ? `<button class="btn-sm danger" onclick="event.stopPropagation();deleteMachine('${m.id}')">🗑</button>` : ''}
+        </td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+}
+
+function showMachineDetail(id) {
+  const m = machines.find(x => x.id === id);
+  if (!m) return;
+  const status = m.status === 'alarm' ? 'alarm' : (m.status === 'online' ? 'online' : 'offline');
+  const lastSeen = m.lastSeen ? new Date(m.lastSeen).toLocaleString('es-CL') : 'Nunca';
+  const role = USER.role;
+  document.getElementById('detail-title').textContent = '🎰 ' + esc(m.name);
+  document.getElementById('detail-content').innerHTML = `
+    <div class="machine-detail-grid">
+      <div class="detail-field"><label>ID</label><div class="val" style="font-family:'JetBrains Mono',monospace;color:var(--nc)">${esc(m.id)}</div></div>
+      <div class="detail-field"><label>Estado</label><div class="val"><span class="status-dot status-${status}"></span>${status.toUpperCase()}</div></div>
+      <div class="detail-field"><label>Ubicacion</label><div class="val">${esc(m.location||'-')}</div></div>
+      <div class="detail-field"><label>Instalador</label><div class="val">${esc(m.installer||'-')}</div></div>
+      <div class="detail-field"><label>Ultima conexion</label><div class="val" style="font-size:12px;color:var(--muted)">${lastSeen}</div></div>
+      <div class="detail-field"><label>Creada</label><div class="val" style="font-size:12px;color:var(--muted)">${new Date(m.created).toLocaleString('es-CL')}</div></div>
+      <div class="detail-field" style="grid-column:1/-1"><label>API Key</label><div class="val"><span class="api-key" onclick="navigator.clipboard.writeText('${m.apiKey}')">${esc(m.apiKey)}</span> <span style="font-size:10px;color:var(--muted)">(click para copiar)</span></div></div>
+    </div>
+    ${m.image ? `<div><label style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Modelo</label><div class="val" style="font-size:16px;font-weight:700;color:var(--nc)">${esc(m.image)}</div></div>` : ''}
+    ${m.observations && m.observations.length ? `
+      <div style="margin-top:12px"><label style="font-size:9px;color:var(--ny);text-transform:uppercase;letter-spacing:1px">📝 Observaciones</label>
+      ${m.observations.map(o => `<div class="obs-item"><div class="meta">${esc(o.by)} — ${new Date(o.at).toLocaleString('es-CL')}</div>${esc(o.text)}</div>`).join('')}</div>` : ''}
+    ${m.ultimasMonedas !== undefined ? `<div style="margin-top:12px;display:flex;gap:16px">
+      <div class="detail-field"><label>Ult. monedas</label><div class="val" style="color:var(--nc)">${m.ultimasMonedas}</div></div>
+      <div class="detail-field"><label>Ult. premios</label><div class="val" style="color:var(--np)">${m.ultimosPremios||0}</div></div>
+      ${m.rssi ? `<div class="detail-field"><label>RSSI</label><div class="val" style="font-size:12px;color:var(--muted)">${m.rssi}dBm</div></div>` : ''}
+      ${m.fw ? `<div class="detail-field"><label>FW</label><div class="val" style="font-size:12px;color:var(--muted)">v${m.fw}</div></div>` : ''}
+    </div>` : ''}
+    ${m.initialCounters ? `<div style="margin-top:16px;background:var(--bg2);border-radius:10px;padding:16px;border:1px solid var(--border)">
+      <div style="font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:1px;color:var(--ny);margin-bottom:10px">📟 CONTADORES INICIAL (respaldo)</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <div style="background:rgba(100,200,255,.1);padding:14px 20px;border-radius:8px;text-align:center;min-width:120px;flex:1">
+          <div style="font-size:10px;text-transform:uppercase;color:var(--nc);letter-spacing:1px">Coin 1</div>
+          <div style="font-size:36px;font-weight:800;color:var(--nc);line-height:1.2">${m.initialCounters.coin}</div>
+          <div style="font-size:9px;color:var(--muted)">inicial</div>
+        </div>
+        <div style="background:rgba(255,150,100,.1);padding:14px 20px;border-radius:8px;text-align:center;min-width:120px;flex:1">
+          <div style="font-size:10px;text-transform:uppercase;color:var(--np);letter-spacing:1px">Out</div>
+          <div style="font-size:36px;font-weight:800;color:var(--np);line-height:1.2">${m.initialCounters.out}</div>
+          <div style="font-size:9px;color:var(--muted)">inicial</div>
+        </div>
+      </div>
+      ${m.ultimoCierre && (m.ultimoCierre.counterCoin !== undefined || m.ultimoCierre.counterOut !== undefined) ? `<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border);display:flex;gap:20px;flex-wrap:wrap">
+        <div style="text-align:center;padding:6px 12px;border-radius:6px;flex:1;min-width:100px">
+          <div style="font-size:9px;text-transform:uppercase;color:var(--nc)">Coin 1</div>
+          <div style="font-size:22px;font-weight:700;color:var(--nc)">${m.ultimoCierre.counterCoin}</div>
+          <div style="font-size:9px;color:var(--muted)">ultimo cierre</div>
+        </div>
+        <div style="text-align:center;padding:6px 12px;border-radius:6px;flex:1;min-width:100px">
+          <div style="font-size:9px;text-transform:uppercase;color:var(--np)">Out</div>
+          <div style="font-size:22px;font-weight:700;color:var(--np)">${m.ultimoCierre.counterOut}</div>
+          <div style="font-size:9px;color:var(--muted)">ultimo cierre</div>
+        </div>
+      </div>` : ''}
+      ${m.counterHistory && m.counterHistory.length > 0 ? `<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">Historial de cambios</div>
+        <div style="font-size:12px;font-weight:700;color:var(--nc);margin:8px 0;line-height:1.4">ULTIMOS CONTADORES FISICOS REGISTRADO POR EL RECAUDADOR</div>
+        ${m.counterHistory.slice().reverse().map(h => `<div style="display:flex;gap:10px;font-size:11px;padding:4px 0;border-bottom:1px solid var(--bg)">
+          <span style="color:var(--muted);min-width:80px">${new Date(h.timestamp).toLocaleDateString('es-CL')}</span>
+          <span style="color:var(--nc)">Coin: ${h.coin}</span>
+          <span style="color:var(--np)">Out: ${h.out}</span>
+          <span style="color:var(--muted);font-size:10px">por ${esc(h.user)}</span>
+        </div>`).join('')}
+        <button class="btn-sm danger" style="margin-top:6px" onclick="clearCounterHistory('${m.id}')">🗑 Limpiar historial</button>
+      </div>` : ''}
+    </div>` : ''}
+    <div style="margin-top:14px;display:flex;gap:6px;flex-wrap:wrap">
+      ${(role==='admin'||role==='tecnico') ? `<button class="btn-sm orange" onclick="regenKey('${m.id}');closeModal('modal-detail');">🔑 Regenerar API Key</button>` : ''}
+      ${(role==='admin'||role==='tecnico') ? `<button class="btn-sm yellow" onclick="openObservation('${m.id}')">📝 Agregar observacion</button>` : ''}
+      ${(role==='admin') ? `<button class="btn-sm cyan" onclick="openEditMachine('${m.id}');closeModal('modal-detail');">✏ Editar maquina</button>` : ''}
+      ${role==='admin' ? `<button class="btn-sm danger" onclick="deleteMachine('${m.id}');closeModal('modal-detail');">🗑 Borrar maquina</button>` : ''}
+    </div>`;
+  openModal('modal-detail');
+}
+
+function openNewMachine() {
+  document.getElementById('machine-modal-title').textContent = '🎰 Nueva Maquina';
+  openModal('modal-machine');
+  document.getElementById('m-name').value = '';
+  document.getElementById('m-location').value = '';
+  document.getElementById('m-installer').value = '';
+  document.getElementById('m-image').value = '';
+  document.getElementById('m-image-preview').innerHTML = '';
+  document.getElementById('m-peluche-max').value = '';
+  document.getElementById('m-credit-value').value = '';
+  document.getElementById('m-init-coin').value = '';
+  document.getElementById('m-init-out').value = '';
+  document.getElementById('m-init-coin').readOnly = false;
+  document.getElementById('m-init-out').readOnly = false;
+  document.getElementById('machine-api-section').style.display = 'none';
+  document.getElementById('btn-save-machine').textContent = 'Crear Maquina';
+  document.getElementById('btn-save-machine').onclick = confirmCreateMachine;
+}
+
+function openEditMachine(id) {
+  const m = machines.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('machine-modal-title').textContent = '✏ Editar Maquina';
+  openModal('modal-machine');
+  document.getElementById('m-name').value = m.name || '';
+  document.getElementById('m-location').value = m.location || '';
+  document.getElementById('m-installer').value = m.installer || '';
+  document.getElementById('m-image').value = m.image || '';
+  document.getElementById('m-image-preview').textContent = m.image ? m.image : '';
+  document.getElementById('m-peluche-max').value = m.pelucheMax || 30;
+  document.getElementById('m-credit-value').value = m.creditValue || 500;
+  document.getElementById('m-init-coin').value = (m.initialCounters && m.initialCounters.coin) || 0;
+  document.getElementById('m-init-out').value = (m.initialCounters && m.initialCounters.out) || 0;
+  const u = getUser();
+  const isNando = u && u.username === 'nando';
+  document.getElementById('m-init-coin').readOnly = !isNando;
+  document.getElementById('m-init-out').readOnly = !isNando;
+  document.getElementById('machine-api-section').style.display = 'none';
+  document.getElementById('btn-save-machine').textContent = 'Actualizar';
+  document.getElementById('btn-save-machine').onclick = () => updateMachine(id);
+}
+
+function updateMachine(id) {
+  const data = {
+    name: document.getElementById('m-name').value.trim(),
+    location: document.getElementById('m-location').value.trim(),
+    installer: document.getElementById('m-installer').value.trim(),
+    image: document.getElementById('m-image').value.trim(),
+    pelucheMax: parseInt(document.getElementById('m-peluche-max').value) || 30,
+    creditValue: parseInt(document.getElementById('m-credit-value').value) || 500,
+    initialCounters: {
+      coin: parseInt(document.getElementById('m-init-coin').value) || 0,
+      out: parseInt(document.getElementById('m-init-out').value) || 0,
+    },
+  };
+  api('/machines/'+id, { method:'PUT', body:JSON.stringify(data) }).then(() => {
+    restoreModalRevenue();
+    showToast('Maquina actualizada', 'ok');
+    loadData();
+  }).catch(e => showToast(e.message, 'bad'));
+}
+
+function previewMachineModel() {
+  const val = document.getElementById('m-image').value;
+  document.getElementById('m-image-preview').textContent = val || '';
+}
+
+function confirmCreateMachine() {
+  const name = document.getElementById('m-name').value.trim();
+  if (!name) { showToast('Nombre requerido', 'bad'); return; }
+  const data = {
+    name,
+    location: document.getElementById('m-location').value.trim(),
+    installer: document.getElementById('m-installer').value.trim(),
+    image: document.getElementById('m-image').value.trim(),
+    initialCounters: {
+      coin: parseInt(document.getElementById('m-init-coin').value) || 0,
+      out: parseInt(document.getElementById('m-init-out').value) || 0,
+    },
+    pelucheMax: parseInt(document.getElementById('m-peluche-max').value) || 30,
+    creditValue: parseInt(document.getElementById('m-credit-value').value) || 500,
+  };
+  openConfirm(
+    '¿Estas seguro de los contadores iniciales?',
+    `Coin 1: <strong>${data.initialCounters.coin}</strong> &nbsp;|&nbsp; Out: <strong>${data.initialCounters.out}</strong><br><span style="color:var(--nr);font-size:12px">No se podran modificar despues de crear la maquina.</span>`,
+    () => saveMachine(data)
+  );
+}
+
+function saveMachine(data) {
+  api('/machines', { method:'POST', body:JSON.stringify(data) }).then(m => {
+    restoreModalRevenue();
+    showToast('Maquina ' + m.name + ' creada (ID: ' + m.id + ')', 'ok');
+    // Show API key
+    document.getElementById('machine-modal-title').textContent = '🎰 Maquina Creada';
+    document.getElementById('m-show-id').textContent = m.id;
+    document.getElementById('m-show-apikey').value = m.apiKey;
+    document.getElementById('machine-api-section').style.display = 'block';
+    document.getElementById('btn-save-machine').textContent = 'Cerrar';
+    document.getElementById('btn-save-machine').onclick = () => { restoreModalRevenue(); loadData(); };
+    machines.push(m);
+    renderMachines();
+    renderDashboard();
+  }).catch(e => showToast(e.message, 'bad'));
+}
+
+function copyApiKey() {
+  const el = document.getElementById('m-show-apikey');
+  navigator.clipboard.writeText(el.value);
+  showToast('API Key copiada', 'ok');
+}
+
+// Neon-styled prompt - reusa modal-revenue (unico que renderiza)
+function neonPrompt(title, placeholder, opts = {}) {
+  return new Promise(resolve => {
+    const rev = document.getElementById('modal-revenue');
+    const revInner = rev.querySelector('.modal');
+    const origHTML = revInner.innerHTML;
+    revInner.className = 'modal ' + (opts.color || 'orange');
+    const msgHtml = opts.message ? `<p style="font-size:12px;margin-bottom:10px">${opts.message}</p>` : '';
+    const inputType = opts.type === 'password' ? 'password' : 'text';
+    const inputStyle = opts.type === 'confirm' ? 'display:none' : '';
+    revInner.innerHTML = `
+      <h3>${title}</h3>
+      ${msgHtml}
+      <div class="field" style="${inputStyle}"><input id="np-input" type="${inputType}" placeholder="${placeholder||''}" style="text-align:center;font-size:16px;font-weight:700"/></div>
+      <div class="modal-actions">
+        <button class="btn-sm" id="np-cancel">Cancelar</button>
+        <button class="btn-sm ${opts.okColor||'green'}" id="np-ok">${opts.type==='confirm'?'Confirmar':'Aceptar'}</button>
+      </div>`;
+    const cancel = () => { revInner.innerHTML = origHTML; closeModal('modal-revenue'); resolve(null); };
+    const ok = () => {
+      if (opts.type === 'confirm') { revInner.innerHTML = origHTML; closeModal('modal-revenue'); resolve(true); return; }
+      const val = document.getElementById('np-input').value;
+      if (opts.required && !val) return;
+      revInner.innerHTML = origHTML; closeModal('modal-revenue'); resolve(val);
+    };
+    document.getElementById('np-cancel').onclick = cancel;
+    document.getElementById('np-ok').onclick = ok;
+    const inp = document.getElementById('np-input');
+    if (inp) {
+      inp.onkeydown = e => { if (e.key === 'Enter') ok(); if (e.key === 'Escape') cancel(); };
+      setTimeout(() => inp.focus(), 100);
+    }
+    openModal('modal-revenue');
+  });
+}
+
+function regenKey(id) {
+  neonPrompt('🔑 Regenerar API Key', 'PIN de administrador', { type: 'password', color: 'orange' }).then(pin => {
+    if (!pin) return;
+    api('/machines/'+id+'/regenerate-key', { method:'POST', body:JSON.stringify({pin}) }).then(d => {
+      showToast('Nueva API Key generada', 'ok');
+      loadMachines();
+      const m = machines.find(x => x.id === id);
+      if (m) m.apiKey = d.apiKey;
+    }).catch(e => showToast(e.message, 'bad'));
+  });
+}
+
+function deleteMachine(id) {
+  neonPrompt('⚠ Eliminar maquina', 'Escribe NANDO', { message: 'Escribe NANDO para borrar esta maquina permanentemente:', color: 'orange', okColor: 'danger' }).then(val => {
+    if (val !== 'NANDO') return;
+    api('/machines/'+id, { method:'DELETE' }).then(() => {
+      showToast('Maquina eliminada', 'ok');
+      loadData();
+    }).catch(e => showToast(e.message, 'bad'));
+  });
+}
+
+function clearCounterHistory(id) {
+  if (USER.username !== 'nando') {
+    showToast('Solo nando puede eliminar el historial', 'bad');
+    return;
+  }
+  openConfirm('Limpiar historial', 'Se eliminaran todos los registros de contadores fisicos.', () => {
+    api('/machines/'+id+'/counter-history', { method:'DELETE' }).then(() => {
+      showToast('Historial eliminado', 'ok');
+      loadMachines();
+    }).catch(e => showToast(e.message, 'bad'));
+  });
+}
+
+function openObservation(id) {
+  neonPrompt('📝 Observacion', 'Escribe una observacion...', { color: 'cyan' }).then(text => {
+    if (!text) return;
+    api('/machines/'+id+'/observation', { method:'POST', body:JSON.stringify({text}) }).then(() => {
+      showToast('Observacion guardada', 'ok');
+      loadMachines();
+    }).catch(e => showToast(e.message, 'bad'));
+  });
+}
+
+// REVENUE
+function loadRevenueSummary() {
+  api('/revenue/summary').then(d => {
+    document.getElementById('rev-total').textContent = '$' + (d.total||0).toLocaleString('es-CL');
+    document.getElementById('rev-hoy').textContent = '$' + (d.totalHoy||0).toLocaleString('es-CL');
+    document.getElementById('rev-count').textContent = d.cierresHoy||0;
+    renderDashboard();
+  }).catch(() => {});
+}
+
+function loadRevenue() {
+  api('/revenue').then(data => {
+    window._revenueData = data;
+    renderRevenue();
+  }).catch(() => {});
+}
+
+function renderRevenue() {
+  const list = document.getElementById('rev-list');
+  const data = window._revenueData || [];
+  if (!data.length) { list.innerHTML = '<div class="empty-state">Sin registros de recaudacion</div>'; return; }
+  list.innerHTML = data.map(r => {
+    const fechaHora = r.cerradoEn ? new Date(r.cerradoEn).toLocaleString('es-CL') : r.fecha;
+    return `<div class="rec-row">
+    <div class="rec-date">${fechaHora}</div>
+    <div><span style="font-size:10px;color:var(--nc)">${esc(r.machineId||'')}</span></div>
+    <div class="rec-vals">
+      <div class="rec-val"><span>Efectivo</span><span class="rec-ef">$${(r.efectivo||0).toLocaleString('es-CL')}.-</span></div>
+      <div class="rec-val"><span>M.P.</span><span class="rec-cr">$${(r.mercadopago||0).toLocaleString('es-CL')}</span></div>
+      <div class="rec-val"><span>Premios</span><span class="rec-pr">${r.premios}</span></div>
+      <div class="rec-val"><span>Total</span><span class="rec-pe">$${(r.pesos||0).toLocaleString('es-CL')}</span></div>
+    </div>
+    <div style="font-size:10px;color:var(--muted)">por ${esc(r.cerradoPor)}${r.restock ? ' <span style="color:var(--ny)">♻ Repuesto</span>' : ''}</div>
+    ${r.observacion ? `<div style="width:100%;font-size:11px;color:var(--ny);padding-top:4px;border-top:1px solid var(--border)">📝 ${esc(r.observacion)}</div>` : ''}
+  </div>`;
+  }).join('');
+}
+
+function openCloseCash() {
+  const rev = document.getElementById('modal-revenue');
+  if (rev._origHTML) {
+    rev.querySelector('.modal').innerHTML = rev._origHTML;
+    rev._origHTML = null;
+  }
+  const sel = document.getElementById('rev-machine');
+  sel.innerHTML = '<option value="">Seleccionar maquina...</option>' + machines.map(m => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+  sel.onchange = function() {
+    fillCloseCashFields(this.value);
+  };
+  document.getElementById('rev-obs').value = '';
+  if (machines.length) {
+    sel.value = machines[0].id;
+    fillCloseCashFields(machines[0].id);
+  }
+  openModal('modal-revenue');
+}
+
+function fillCloseCashFields(machineId) {
+  if (!machineId) { showToast('Sin maquina seleccionada', 'bad'); return; }
+  const m = machines.find(x => x.id === machineId);
+  const premiosVal = (m && m.ultimosPremios !== undefined) ? m.ultimosPremios : 0;
+  const monedasVal = (m && m.ultimasMonedas !== undefined) ? m.ultimasMonedas : 0;
+  const valorMoneda = (m && m.counters && m.counters.coin1 && m.counters.coin1.valuePerPulse) ? m.counters.coin1.valuePerPulse : 0;
+  const efectivoCalc = monedasVal * valorMoneda;
+  document.getElementById('rev-efectivo').value = efectivoCalc;
+  document.getElementById('rev-premios').value = premiosVal;
+  // Contadores fisicos — en blanco, el usuario los llena manual
+  document.getElementById('rev-counter-coin').value = '';
+  document.getElementById('rev-counter-out').value = '';
+  // Mostrar stock de peluches
+  const stockRow = document.getElementById('rev-peluche-stock-row');
+  const stockInput = document.getElementById('rev-peluche-stock');
+  if (m && m.pelucheMax) {
+    const restantes = Math.max(0, m.pelucheMax - premiosVal);
+    stockInput.value = `${restantes} / ${m.pelucheMax}`;
+    stockInput.style.color = restantes <= 5 ? 'var(--nr)' : 'var(--ny)';
+    stockRow.style.display = '';
+  } else {
+    stockRow.style.display = 'none';
+  }
+  // Cargar MP payments para esta maquina
+  api('/mercadopago/payments').then(payments => {
+    const mps = (payments || []).filter(p => p.machineId === machineId && p.status === 'approved');
+    const mpTotal = mps.reduce((s, p) => s + (p.amount || 0), 0);
+    document.getElementById('rev-mp').value = mpTotal;
+    document.getElementById('rev-mp-count').textContent = mps.length;
+    calcCloseCashTotal();
+  }).catch(() => {});
+  calcCloseCashTotal();
+}
+
+function calcCloseCashTotal() {
+  const efectivo = parseInt(document.getElementById('rev-efectivo').value) || 0;
+  const mp = parseInt(document.getElementById('rev-mp').value) || 0;
+  document.getElementById('rev-pesos').value = efectivo + mp;
+}
+
+function confirmRevenue() {
+  const machineId = document.getElementById('rev-machine').value;
+  const efectivo = parseInt(document.getElementById('rev-efectivo').value) || 0;
+  const premios = parseInt(document.getElementById('rev-premios').value) || 0;
+  const mercadopago = parseInt(document.getElementById('rev-mp').value) || 0;
+  const observacion = document.getElementById('rev-obs').value.trim();
+  const machineName = document.getElementById('rev-machine').selectedOptions?.[0]?.text || machineId;
+  const pesos = parseInt(document.getElementById('rev-pesos').value) || 0;
+  const data = { machineId, efectivo, premios, mercadopago, pesos, observacion, machineName };
+  if (!data.machineId) { showToast('Selecciona una maquina', 'bad'); return; }
+  const m = machines.find(x => x.id === machineId);
+  data.counterCoin = parseInt(document.getElementById('rev-counter-coin').value) || 0;
+  data.counterOut = parseInt(document.getElementById('rev-counter-out').value) || 0;
+  const pelucheMax = m?.pelucheMax || 0;
+  const restantes = pelucheMax ? Math.max(0, pelucheMax - premios) : 0;
+  const rev = document.getElementById('modal-revenue');
+  const revInner = rev.querySelector('.modal');
+  revInner.className = 'modal green';
+  revInner.innerHTML = `
+    <h3>💰 Confirmar Recaudacion</h3>
+    <div style="font-size:13px;line-height:1.8">
+      <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--muted)">Maquina</span><strong>${esc(data.machineName)}</strong></div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--muted)">Efectivo</span><strong style="color:var(--ng)">$${data.efectivo.toLocaleString('es-CL')}</strong></div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--muted)">MercadoPago</span><strong style="color:var(--np)">$${data.mercadopago.toLocaleString('es-CL')}</strong></div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--muted)">Premios</span><strong>${data.premios}</strong></div>
+      ${pelucheMax ? `<div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--muted)">Stock peluches</span><strong style="color:${restantes <= 5 ? 'var(--nr)' : 'var(--ny)'}">${restantes} / ${pelucheMax}</strong></div>` : ''}
+      <div style="display:flex;justify-content:space-between;padding:8px 0 4px;border-top:1px solid var(--border);margin-top:4px"><span style="color:var(--muted)">Total</span><strong style="font-size:18px;color:var(--ng)">$${data.pesos.toLocaleString('es-CL')}</strong></div>
+      ${data.observacion ? `<div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--muted)">Obs</span><em>${esc(data.observacion)}</em></div>` : ''}
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid var(--border);margin-top:4px">
+        <span style="color:var(--muted)">Coin 1</span><strong style="color:var(--nc)">${data.counterCoin}</strong>
+        <span style="color:var(--muted)">Out</span><strong style="color:var(--np)">${data.counterOut}</strong>
+      </div>
+    </div>
+    ${pelucheMax ? `
+    <div style="margin-top:14px;padding:12px;background:var(--bg2);border-radius:8px;border:1px solid var(--border)">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px">
+        <input type="checkbox" id="rev-restock" style="width:18px;height:18px;accent-color:var(--ny)"/>
+        <span>♻ Reponer peluches (llenar a <strong>${pelucheMax}</strong>)</span>
+      </label>
+    </div>` : ''}
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-sm" id="rev-confirm-cancel">Cancelar</button>
+      <button class="btn-sm green" id="rev-confirm-ok">✔ Confirmar y Guardar</button>
+    </div>`;
+  document.getElementById('rev-confirm-cancel').onclick = () => {
+    revInner.innerHTML = rev._origHTML || revInner.innerHTML;
+    revInner.className = 'modal green';
+  };
+  document.getElementById('rev-confirm-ok').onclick = () => {
+    data.restock = pelucheMax ? document.getElementById('rev-restock')?.checked : false;
+    saveRevenue(data, rev, revInner);
+  };
+}
+
+function saveRevenue(data, rev, revInner) {
+  api('/revenue', { method:'POST', body:JSON.stringify(data) }).then(() => {
+    const m = machines.find(x => x.id === data.machineId);
+    if (m) {
+      m._monedaAtClose = (m._lastMonedaValue !== undefined ? m._lastMonedaValue : 0);
+      m.ultimasMonedas = 0;
+      m.creditsSent = 0;
+      localStorage.setItem('mc_' + m.id, JSON.stringify({ at: m._monedaAtClose, ts: Date.now() }));
+      if (data.restock) {
+        m._premioAtClose = (m._lastPremioValue !== undefined ? m._lastPremioValue : 0);
+        m.ultimosPremios = 0;
+        localStorage.setItem('pc_' + m.id, JSON.stringify({ at: m._premioAtClose, ts: Date.now() }));
+      }
+    }
+    const restockMsg = data.restock ? '<div style="color:var(--ny);font-size:12px;margin-top:6px">♻ Peluches repuestos a capacidad maxima</div>' : '';
+    revInner.innerHTML = `
+      <h3>✅ Recaudacion Registrada</h3>
+      <div style="font-size:13px;line-height:1.8;text-align:center;padding:12px 0">
+        <div style="font-size:14px;margin-bottom:8px">${esc(data.machineName)}</div>
+        <div style="font-size:24px;font-weight:700;color:var(--ng)">$${data.pesos.toLocaleString('es-CL')}</div>
+        <div style="color:var(--muted);font-size:12px;margin-top:4px">Efectivo $${data.efectivo.toLocaleString('es-CL')} · MP $${data.mercadopago.toLocaleString('es-CL')}</div>
+        <div style="color:var(--muted);font-size:12px">Premios ${data.premios}</div>
+        ${restockMsg}
+      </div>
+      <div class="modal-actions">
+        <button class="btn-sm green" id="rev-result-close">Cerrar</button>
+      </div>`;
+    document.getElementById('rev-result-close').onclick = () => {
+      closeModal('modal-revenue');
+      showToast('Cierre registrado', 'ok');
+      renderMachines();
+      if (_mdMachineId && m) { renderMDStats(m); renderMDCounters(m); }
+      loadRevenueSummary();
+      loadRevenue();
+    };
+    revInner.className = 'modal green';
+  }).catch(e => {
+    showToast(e.message, 'bad');
+    revInner.innerHTML = rev._origHTML || revInner.innerHTML;
+    revInner.className = 'modal green';
+  });
+}
+
+// ALARMS
+function loadAlarms() {
+  api('/alarms').then(data => {
+    const list = document.getElementById('alarms-list');
+    if (!data.length) { list.innerHTML = '<div class="empty-state">Sin alarmas activas</div>'; return; }
+    list.innerHTML = data.map(a => `<div class="alarm-item">
+      <div class="time">${new Date(a.triggeredAt).toLocaleString('es-CL')}</div>
+      <div class="machine">${esc(a.machineId || '')}</div>
+      <div class="msg">${esc(a.message)}</div>
+      <button class="btn-sm green" onclick="resolveAlarm('${a.id}')" style="margin-top:6px">✔ Resolver</button>
+    </div>`).join('');
+  }).catch(() => {});
+  api('/alarms/history').then(data => {
+    const hist = document.getElementById('alarms-history');
+    if (!data.length) { hist.innerHTML = '<div class="empty-state">Sin historial</div>'; return; }
+    hist.innerHTML = data.map(a => `<div class="alarm-item" style="${a.resolved ? 'opacity:.5' : ''}">
+      <div class="time">${new Date(a.triggeredAt).toLocaleString('es-CL')}</div>
+      <div class="machine">${esc(a.machineId || '')}</div>
+      <div class="msg" style="${a.resolved ? 'color:var(--muted)' : ''}">${esc(a.message)} ${a.resolved ? '✔' : ''}</div>
+    </div>`).join('');
+  }).catch(() => {});
+}
+
+function resolveAlarm(id) {
+  api('/alarms/'+id+'/resolve', { method:'PUT' }).then(() => { showToast('Alarma resuelta', 'ok'); loadAlarms(); }).catch(e => showToast(e.message, 'bad'));
+}
+
+// DASHBOARD
+function renderDashboard() {
+  const role = USER.role;
+  const online = machines.filter(m => m.status === 'online').length;
+  const offline = machines.filter(m => !m.status || m.status === 'offline' || m.status === 'unknown' || m.status === 'pending').length;
+  const alarm = machines.filter(m => m.status === 'alarm').length;
+  const activeAlarms = [];
+  // Get alarm data
+  const statsHtml = `
+    <div class="stat-card cyan"><div class="stat-icon">🎰</div><div class="stat-label">Maquinas</div><div class="stat-value">${machines.length}</div><div class="stat-sub">Registradas</div></div>
+    <div class="stat-card green"><div class="stat-icon">🟢</div><div class="stat-label">En linea</div><div class="stat-value">${online}</div><div class="stat-sub">Conectadas</div></div>
+    <div class="stat-card red"><div class="stat-icon">🔴</div><div class="stat-label">Fuera de linea</div><div class="stat-value">${offline}</div></div>
+    ${alarm ? `<div class="stat-card orange"><div class="stat-icon">🚨</div><div class="stat-label">Alarmas</div><div class="stat-value">${alarm}</div></div>` : ''}
+    ${role === 'admin' || role === 'recaudador' ? `
+      <div class="stat-card pink"><div class="stat-icon">💰</div><div class="stat-label">Recaudado Hoy</div><div class="stat-value">$${(parseInt(document.getElementById('rev-hoy').textContent.replace(/[^0-9]/g,''))||0).toLocaleString('es-CL')}</div></div>
+      <div class="stat-card yellow"><div class="stat-icon">📊</div><div class="stat-label">Total</div><div class="stat-value">$${(parseInt(document.getElementById('rev-total').textContent.replace(/[^0-9]/g,''))||0).toLocaleString('es-CL')}</div></div>
+    ` : ''}`;
+  document.getElementById('stats-grid').innerHTML = statsHtml;
+
+  // Machine list
+  const ml = document.getElementById('dash-machines');
+  if (!machines.length) { ml.innerHTML = '<div class="empty-state">Sin maquinas registradas. Ve a la pestana Maquinas para crear una.</div>'; return; }
+  ml.innerHTML = machines.map(m => {
+    const s = m.status === 'alarm' ? 'alarm' : (m.status === 'online' ? 'online' : 'offline');
+    const ls = m.lastSeen ? new Date(m.lastSeen).toLocaleString('es-CL') : 'Nunca';
+    return `<div class="rec-row" style="cursor:pointer" onclick="switchTab('machines')">
+      <div><span class="status-dot status-${s}"></span><strong>${esc(m.name)}</strong></div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--nc)">${esc(m.id)}</div>
+      <div style="font-size:11px;color:var(--muted)">${esc(m.location||'')}</div>
+      <div style="font-size:10px;color:var(--muted)">${ls}</div>
+    </div>`;
+  }).join('');
+
+  // Alarms card
+  const ac = document.getElementById('dash-alarms-card');
+  if (alarm > 0) {
+    ac.style.display = '';
+    api('/alarms').then(data => {
+      document.getElementById('dash-alarms').innerHTML = data.slice(0,5).map(a => `<div class="alarm-item">
+        <div class="time">${new Date(a.triggeredAt).toLocaleString('es-CL')}</div>
+        <div class="machine">${esc(a.machineId)}</div>
+        <div class="msg">${esc(a.message)}</div>
+      </div>`).join('');
+    }).catch(() => {});
+  } else {
+    ac.style.display = 'none';
+  }
+}
+
+// USERS
+function loadUsers() {
+  api('/users').then(data => {
+    const list = document.getElementById('users-list');
+    const role = USER.role;
+    list.innerHTML = `<table><thead><tr><th>Usuario</th><th>Nombre</th><th>Rol</th><th>Trial</th>${role==='admin'?'<th style="text-align:right">Accion</th>':''}</tr></thead><tbody>
+      ${data.map(u => `<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--nc)">${esc(u.username)}</td><td>${esc(u.name||'')}</td><td style="text-transform:uppercase;font-size:11px">${esc(u.role)}</td><td style="font-size:11px;color:var(--muted)">${u.trialExpiry ? Math.ceil(Math.max(0,u.trialExpiry-Date.now())/(24*3600*1000))+'d' : '-'}</td>
+        ${role==='admin'?`<td style="text-align:right"><button class="btn-sm danger" onclick="deleteUser('${u.username}')">🗑</button></td>`:''}
+      </tr>`).join('')}</tbody></table>`;
+  }).catch(() => {});
+}
+
+function openNewUser() {
+  document.getElementById('u-name').value = '';
+  document.getElementById('u-realname').value = '';
+  document.getElementById('u-pass').value = '';
+  document.getElementById('u-role').value = 'tecnico';
+  document.getElementById('u-trial').value = '7';
+  openModal('modal-user');
+}
+
+function saveUser() {
+  const data = {
+    username: document.getElementById('u-name').value.trim(),
+    password: document.getElementById('u-pass').value,
+    role: document.getElementById('u-role').value,
+    name: document.getElementById('u-realname').value.trim(),
+    trialDays: parseInt(document.getElementById('u-trial').value) || 0,
+  };
+  if (!data.username || !data.password) { showToast('Completa todos los campos', 'bad'); return; }
+  api('/users', { method:'POST', body:JSON.stringify(data) }).then(() => {
+    restoreModalRevenue();
+    showToast('Usuario creado', 'ok');
+    loadUsers();
+  }).catch(e => showToast(e.message, 'bad'));
+}
+
+function deleteUser(username) {
+  if (username === 'nando') {
+    // First attempt: warning modal
+    const rev = document.getElementById('modal-revenue');
+    const revInner = rev.querySelector('.modal');
+    if (!rev._origHTML) rev._origHTML = revInner.innerHTML;
+    revInner.className = 'modal';
+    revInner.innerHTML = `
+      <h3>🚫 Accion Bloqueada</h3>
+      <div style="text-align:center;padding:16px 0;font-size:14px;line-height:1.6">
+        <div style="font-size:40px;margin-bottom:12px">👑</div>
+        <strong style="color:var(--nr)">Es imposible borrar al creador</strong>
+        <div style="color:var(--muted);font-size:12px;margin-top:8px">Nando es el super usuario del sistema</div>
+        <div style="color:var(--muted);font-size:11px;margin-top:4px">Si lo intentas de nuevo seras suspendido automaticamente</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-sm green" id="nando-warn-ok">Entendido</button>
+      </div>`;
+    document.getElementById('nando-warn-ok').onclick = () => {
+      revInner.innerHTML = rev._origHTML;
+      rev._origHTML = null;
+      revInner.className = 'modal green';
+      closeModal('modal-revenue');
+    };
+    openModal('modal-revenue');
+    return;
+  }
+  openConfirm('Eliminar Usuario', 'Seguro de eliminar a ' + username + '?', () => {
+    api('/users/'+username, { method:'DELETE' }).then(() => { showToast('Usuario eliminado', 'ok'); loadUsers(); }).catch(e => {
+      // Suspension message
+      if (e.message.includes('suspendido')) {
+        const rev = document.getElementById('modal-revenue');
+        const revInner = rev.querySelector('.modal');
+        revInner.className = 'modal';
+        revInner.innerHTML = `
+          <h3>⛔ Suspendido</h3>
+          <div style="text-align:center;padding:16px 0;font-size:14px;line-height:1.6">
+            <div style="font-size:40px;margin-bottom:12px">🔒</div>
+            <strong style="color:var(--nr)">Has sido suspendido</strong>
+            <div style="color:var(--muted);font-size:12px;margin-top:8px">Por intentar borrar al creador del sistema</div>
+            <div style="color:var(--muted);font-size:11px;margin-top:4px">Contacta a Nando para que te reactive</div>
+          </div>
+          <div class="modal-actions">
+            <button class="btn-sm green" id="suspend-ok">Cerrar sesion</button>
+          </div>`;
+        document.getElementById('suspend-ok').onclick = () => { localStorage.removeItem('ng_token'); location.reload(); };
+        openModal('modal-revenue');
+      } else {
+        showToast(e.message, 'bad');
+      }
+    });
+  });
+}
+
+// LOGIN LOG
+function loadLoginLog() {
+  api('/login-log').then(data => {
+    const list = document.getElementById('logs-list');
+    if (!data.length) { list.innerHTML = '<div class="empty-state">Sin registros</div>'; return; }
+    list.innerHTML = data.map(l => `<div class="log-row">
+      <span style="font-weight:600;text-transform:uppercase">${esc(l.user)}</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:10px">${new Date(l.time).toLocaleString('es-CL')}</span>
+      <span style="font-size:10px;color:var(--muted)">${esc(l.ip||'')}</span>
+    </div>`).join('');
+  }).catch(() => {});
+}
+
+function clearLoginLog() {
+  openConfirm('Limpiar historial', 'Se eliminaran todos los registros de acceso.', () => {
+    api('/login-log', { method:'DELETE' }).then(() => { showToast('Historial limpiado', 'ok'); loadLoginLog(); }).catch(e => showToast(e.message, 'bad'));
+  });
+}
+
+function openConfirm(title, msg, onConfirm) {
+  const rev = document.getElementById('modal-revenue');
+  const revInner = rev.querySelector('.modal');
+  rev._origHTML = revInner.innerHTML;
+  revInner.className = 'modal orange';
+  revInner.innerHTML = `
+    <h3>${title}</h3>
+    <p style="font-size:13px;margin:8px 0 16px">${msg}</p>
+    <div class="modal-actions">
+      <button class="btn-sm" id="confirm-cancel">Cancelar</button>
+      <button class="btn-sm green" id="confirm-ok">Confirmar</button>
+    </div>`;
+  document.getElementById('confirm-cancel').onclick = () => {
+    revInner.innerHTML = rev._origHTML; closeModal('modal-revenue');
+  };
+  document.getElementById('confirm-ok').onclick = () => {
+    revInner.innerHTML = rev._origHTML; closeModal('modal-revenue'); onConfirm();
+  };
+  openModal('modal-revenue');
+}
+
+// MQTT for real-time machine monitoring
+function connectMQTT() {
+  mqttClient = mqtt.connect('wss://g71b6171.ala.us-east-1.emqxsl.com:8084/mqtt', {
+    clientId: 'ngpanel3_' + Date.now(), clean: true,
+    username: 'nandox69', password: 'osorno7669', connectTimeout: 10000,
+  });
+  mqttClient.on('connect', () => {
+    mqttClient.subscribe('peluche/estado');
+    mqttClient.subscribe('peluche/moneda');
+    mqttClient.subscribe('peluche/premio');
+    mqttClient.subscribe('peluche/credito');
+  });
+  mqttClient.on('message', (topic, payload) => {
+    try {
+      const data = payload.toString();
+      if (topic === 'peluche/estado') {
+        const j = JSON.parse(data);
+        const mid = j.machine || '';
+        const m = machines.find(x => x.id === mid);
+        if (!m) return;
+        // Heartbeat simple (ej: {"status":"online","machine":"M0001"}) — solo refrescar lastSeen
+        if (j.status === 'online' || j.status === 'offline') {
+          if (j.status === 'online') m.lastSeen = new Date().toISOString();
+          return;
+        }
+        m.lastSeen = new Date().toISOString();
+        m.status = j.power === 'on' ? 'online' : 'offline';
+        if (j.monedas !== undefined) {
+          m._lastMonedaValue = j.monedas;
+          if (m._monedaAtClose == null) {
+            m.ultimasMonedas = j.monedas;
+          } else {
+            m.ultimasMonedas = Math.max(0, j.monedas - m._monedaAtClose);
+          }
+        }
+        if (j.premios !== undefined) {
+          m._lastPremioValue = j.premios;
+          if (m._premioAtClose == null) {
+            m.ultimosPremios = j.premios;
+          } else {
+            m.ultimosPremios = Math.max(0, j.premios - m._premioAtClose);
+          }
+        }
+        if (j.rssi !== undefined) m.rssi = j.rssi;
+        m._powerCycling = j.power_cycling === true || j.power_cycling === 'true';
+        // Debounce power mode: no sobreescribir si el usuario cambio hace < 15s
+        if (!m._powerModeAt || Date.now() - m._powerModeAt > 15000) {
+          m._powerMode = j.power_mode;
+        }
+        if (j.schedule_active !== undefined) m._scheduleActive = j.schedule_active === true || j.schedule_active === 'true';
+        if (j.schedule_days !== undefined) m._scheduleDays = typeof j.schedule_days === 'number' ? j.schedule_days : parseInt(j.schedule_days);
+        if (j.schedule_on) { const p = j.schedule_on.split(':'); if (p.length===2) { m._scheduleOnH=parseInt(p[0]); m._scheduleOnM=parseInt(p[1]); } }
+        if (j.schedule_off) { const p = j.schedule_off.split(':'); if (p.length===2) { m._scheduleOffH=parseInt(p[0]); m._scheduleOffM=parseInt(p[1]); } }
+        if (j.relay_active_low !== undefined) m._relayActiveLow = j.relay_active_low === true || j.relay_active_low === 'true';
+        updateMDMachineFromMQTT(mid, j);
+        // Refrescar UI horario solo si el usuario no esta editando
+        if (mid === _mdMachineId && !_mdScheduleDirty) loadMDSchedule(m);
+      }
+      if (topic === 'peluche/moneda') {
+        const j = JSON.parse(data);
+        const mid = j.machine || '';
+        const m = machines.find(x => x.id === mid);
+        if (m && typeof j.value === 'number') {
+          m._lastMonedaValue = j.value;
+          if (m._monedaAtClose == null) {
+            m.ultimasMonedas = j.value;
+          } else {
+            m.ultimasMonedas = Math.max(0, j.value - m._monedaAtClose);
+          }
+        }
+        if (mid === _mdMachineId) {
+          addMDLive('💵', 'moneda', 'Moneda — total: ' + (j.value||0));
+          const mm = machines.find(x => x.id === mid);
+          if (mm) renderMDStats(mm);
+        }
+      }
+      if (topic === 'peluche/premio') {
+        const j = JSON.parse(data);
+        const mid = j.machine || '';
+        const m = machines.find(x => x.id === mid);
+        if (m && typeof j.value === 'number') {
+          m._lastPremioValue = j.value;
+          if (m._premioAtClose == null) {
+            m.ultimosPremios = j.value;
+          } else {
+            m.ultimosPremios = Math.max(0, j.value - m._premioAtClose);
+          }
+        }
+        if (mid === _mdMachineId) {
+          addMDLive('🧸', 'premio', 'Premio — total: ' + (j.value||0));
+          const mm = machines.find(x => x.id === mid);
+          if (mm) renderMDStats(mm);
+        }
+      }
+      if (topic === 'peluche/credito') {
+        // El panel ya agrega live event en mdSendCredits; ignorar echo del ESP32
+      }
+    } catch {}
+  });
+  mqttClient.on('error', () => {});
+  mqttClient.on('close', () => setTimeout(connectMQTT, 10000));
+}
+
+// ===== MACHINE DETAIL VIEW =====
+let _mdMachineId = null;
+let _mdScheduleDirty = false;
+let _mdLiveEvents = [];
+
+function enterMachineDetail(id) {
+  _mdMachineId = id;
+  _mdScheduleDirty = false;
+  _mdLiveEvents = [];
+  const m = machines.find(x => x.id === id);
+  if (!m) return;
+  document.getElementById('mdetail-name').textContent = m.name;
+  document.getElementById('mdetail-id').textContent = m.id;
+  document.getElementById('md-apikey').textContent = m.apiKey || '';
+  updateMDPowerPill(m);
+  renderMDStats(m);
+  renderMDCounters(m);
+  renderMDMPPayments(m);
+  renderMDObs(m);
+  populateMDTimeSelects();
+  loadMDSchedule(m);
+  // Show detail panel directly (no tab element for it)
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-machinedetail').classList.add('active');
+}
+
+function exitMachineDetail() {
+  _mdMachineId = null;
+  switchTab('machines');
+}
+
+function updateMDPowerPill(m) {
+  const pill = document.getElementById('mdetail-powerpill');
+  const txt = document.getElementById('mdetail-powertxt');
+  if (!m) { pill.className = 'power-pill'; txt.textContent = '--'; return; }
+  const mode = m._powerMode;
+  const ps = m._powerStatus;
+  const machineIcon = ps === 'on' ? '🟢' : (ps === 'off' ? '🔴' : '⚪');
+  const ardiIcon = m.status === 'online' ? '🟢' : '⚫';
+  if (m._powerCycling) {
+    pill.className = 'power-pill cycling'; txt.textContent = '🟡 Reiniciando...';
+  } else {
+    pill.className = m.status === 'online' ? 'power-pill on' : 'power-pill';
+    txt.textContent = machineIcon + ' maquina · ' + ardiIcon + ' arduino';
+  }
+  // Mode buttons
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active-on','active-off','active-auto'));
+  if (mode) {
+    const btn = document.getElementById('md-mode-' + mode);
+    if (btn) btn.classList.add('active-' + mode);
+  }
+  document.getElementById('md-esp-status').textContent = 'ESP32: ' + (m.status === 'online' ? '🟢 en linea' : '⚫ sin respuesta');
+  document.getElementById('md-relay-label').textContent = 'Polaridad: ' + (m._relayActiveLow ? 'LOW activa' : 'HIGH activa');
+}
+
+function rssiLabel(v) {
+  if (v === undefined || v === null) return { emoji: '⚪', text: '--' };
+  if (v >= -50) return { emoji: '🟢', text: 'Excelente' };
+  if (v >= -60) return { emoji: '🟡', text: 'Buena' };
+  if (v >= -70) return { emoji: '🟠', text: 'Regular' };
+  return { emoji: '🔴', text: 'Baja' };
+}
+
+function renderMDStats(m) {
+  if (!m) return;
+  const rssiInfo = m.rssi !== undefined ? rssiLabel(m.rssi) : { emoji: '⚪', text: '--' };
+  const ultimasMonedas = m.ultimasMonedas !== undefined ? m.ultimasMonedas : 0;
+  const ultimosPremios = m.ultimosPremios !== undefined ? m.ultimosPremios : '--';
+  const creditsSent = m.creditsSent || 0;
+  api('/revenue/machine/' + m.id).then(r => {
+    const total = r.total || 0;
+    const revCreds = r.records ? r.records.reduce((s,x) => s+(x.creditos||0), 0) : 0;
+    const creditos = creditsSent + revCreds;
+    const mpTotal = r.records ? r.records.reduce((s,x) => s+(x.mercadopago||0), 0) : 0;
+    document.getElementById('mdetail-stats').innerHTML = `
+      <div class="stat-card green"><div class="stat-icon">💵</div><div class="stat-label">Efectivo</div><div class="stat-value">$${(ultimasMonedas * 100).toLocaleString('es-CL')}</div><div class="stat-sub">$${total.toLocaleString('es-CL')} recaudado</div></div>
+      <div class="stat-card blue"><div class="stat-icon">💳</div><div class="stat-label">MercadoPago</div><div class="stat-value">$${mpTotal.toLocaleString('es-CL')}</div><div class="stat-sub">recaudado con MercadoPago</div></div>
+      <div class="stat-card pink"><div class="stat-icon">🎮</div><div class="stat-label">Creditos Enviados</div><div class="stat-value">${creditos}</div></div>
+      <div class="stat-card" style="background:var(--card);border:1px solid ${m.pelucheMax && Math.max(0, m.pelucheMax - (ultimosPremios||0)) / m.pelucheMax < 0.3 ? 'var(--nr)' : 'var(--border)'};border-radius:var(--radius);padding:16px"><div class="stat-icon">🧸</div><div class="stat-label">Premios</div><div class="stat-value">${ultimosPremios}</div>${m.pelucheMax ? `<div class="stat-sub" style="color:${Math.max(0, m.pelucheMax - (ultimosPremios||0)) / m.pelucheMax < 0.3 ? 'var(--nr)' : 'var(--ny)'}">Stock ${Math.max(0, m.pelucheMax - (ultimosPremios||0))} / ${m.pelucheMax}</div>` : ''}</div>
+      <div class="stat-card yellow"><div class="stat-icon">📡</div><div class="stat-label">Senal</div><div class="stat-value">${rssiInfo.emoji}</div><div class="stat-sub">${rssiInfo.text}</div></div>
+      ${r.ultimo ? `<div class="stat-card" style="grid-column:1/-1;border-color:var(--nc)"><div class="stat-icon">📋</div><div class="stat-label">Ultimo Cierre</div><div class="stat-value" style="font-size:12px">${new Date(r.ultimo.cerradoEn).toLocaleString('es-CL')}</div><div class="stat-sub">por ${esc(r.ultimo.cerradoPor)} — Efectivo: $${(r.ultimo.efectivo||0).toLocaleString('es-CL')}.- MP: $${(r.ultimo.mp||0).toLocaleString('es-CL')} Total: $${(r.ultimo.pesos||0).toLocaleString('es-CL')} — Cierres: ${r.count||0}</div><div style="margin-top:4px;display:flex;gap:16px;justify-content:center;font-size:13px"><span><strong>Coin 1:</strong> ${r.ultimo.counterCoin !== undefined ? r.ultimo.counterCoin : '--'}</span><span><strong>Out:</strong> ${r.ultimo.counterOut !== undefined ? r.ultimo.counterOut : '--'}</span></div></div>` : `<div class="stat-card" style="grid-column:1/-1;border-color:var(--nc)"><div class="stat-icon">📋</div><div class="stat-label">Ultimo Cierre</div><div class="stat-value" style="font-size:12px">Sin cierres</div><div class="stat-sub">Cierres: 0</div></div>`}
+    `;
+  }).catch(() => {
+    document.getElementById('mdetail-stats').innerHTML = '<div class="stat-card green">Error cargando datos</div>';
+  });
+}
+
+function renderMDMPPayments(m) {
+  const el = document.getElementById('md-mp-payments');
+  api('/mercadopago/payments').then(payments => {
+    const mps = (payments || []).filter(p => p.machineId === m.id && p.status === 'approved').sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+    if (!mps.length) {
+      el.innerHTML = '<div class="empty-state">Sin pagos realizados</div>';
+      return;
+    }
+    el.innerHTML = mps.map(p => {
+      return `<div style="display:flex;justify-content:space-between;font-size:11px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span>✅ $${(p.amount||0).toLocaleString('es-CL')}</span>
+        <span style="color:var(--nc)">${p.credits||0} credito(s)</span>
+        <span style="color:var(--muted);font-size:10px">${p.paidAt ? new Date(p.paidAt).toLocaleString('es-CL') : ''}</span>
+      </div>`;
+    }).join('');
+  }).catch(() => {
+    el.innerHTML = '<div class="empty-state">Error cargando</div>';
+  });
+}
+
+function renderMDCounters(m) {
+  const el = document.getElementById('md-counters');
+  if (!m.initialCounters) {
+    el.innerHTML = '<div class="empty-state">Sin contadores configurados</div>';
+    return;
+  }
+  el.innerHTML = `
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px">
+      <div style="text-align:center;padding:10px 16px;background:rgba(100,200,255,.08);border-radius:6px;flex:1;min-width:80px">
+        <div style="font-size:9px;text-transform:uppercase;color:var(--nc)">Coin 1</div>
+        <div style="font-size:24px;font-weight:700;color:var(--nc)">${m.initialCounters.coin}</div>
+        <div style="font-size:9px;color:var(--muted)">inicial</div>
+      </div>
+      <div style="text-align:center;padding:10px 16px;background:rgba(255,150,100,.08);border-radius:6px;flex:1;min-width:80px">
+        <div style="font-size:9px;text-transform:uppercase;color:var(--np)">Out</div>
+        <div style="font-size:24px;font-weight:700;color:var(--np)">${m.initialCounters.out}</div>
+        <div style="font-size:9px;color:var(--muted)">inicial</div>
+      </div>
+    </div>`;
+}
+
+function mdOpenSetCounters() {
+  const m = machines.find(x => x.id === _mdMachineId);
+  if (!m) return;
+  const keys = ['coin1','coin2','bill','win'];
+  const labels = { coin1:'Moneda 1', coin2:'Moneda 2', bill:'Billete', win:'Premio' };
+  const prev = m.digitalReadings || {};
+  let html = keys.map(k => {
+    const c = m.counters && m.counters[k];
+    if (!c || !c.enabled) return '';
+    return `<div class="field"><label>${esc(c.label)}</label><input id="md-cnt-${k}" type="number" min="0" value="${prev[k]||0}"/></div>`;
+  }).join('');
+  if (!html) { showToast('No hay contadores habilitados', 'bad'); return; }
+  openCustomModal('📊 Actualizar lectura de contadores', html, [
+    { text:'Cancelar', cls:'', fn:closeCustomModal },
+    { text:'Guardar', cls:'green', fn:() => {
+      const readings = {};
+      keys.forEach(k => {
+        const el = document.getElementById('md-cnt-'+k);
+        if (el) readings[k] = parseInt(el.value) || 0;
+      });
+      api('/machines/'+m.id, { method:'PUT', body:JSON.stringify({ digitalReadings: readings }) }).then(() => {
+        closeCustomModal();
+        showToast('Lecturas actualizadas', 'ok');
+        loadMachines();
+      }).catch(e => showToast(e.message, 'bad'));
+    }}
+  ]);
+}
+
+function renderMDObs(m) {
+  const el = document.getElementById('md-obs');
+  if (!m.observations || !m.observations.length) {
+    el.innerHTML = '<div class="empty-state">Sin observaciones</div>';
+    return;
+  }
+  el.innerHTML = m.observations.map(o => `<div class="obs-item"><div class="meta">${esc(o.by)} — ${new Date(o.at).toLocaleString('es-CL')}</div>${esc(o.text)}</div>`).join('');
+}
+
+function populateMDTimeSelects() {
+  ['md-sch-on-h','md-sch-off-h'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '';
+    for (let h = 0; h < 24; h++) {
+      const opt = document.createElement('option');
+      opt.value = h; opt.textContent = String(h).padStart(2,'0');
+      sel.appendChild(opt);
+    }
+  });
+  ['md-sch-on-m','md-sch-off-m'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '';
+    for (let m = 0; m < 60; m++) {
+      const opt = document.createElement('option');
+      opt.value = m; opt.textContent = String(m).padStart(2,'0');
+      sel.appendChild(opt);
+    }
+  });
+}
+
+function loadMDSchedule(m) {
+  const active = document.getElementById('md-sch-active');
+  active.checked = m._scheduleActive || false;
+  document.getElementById('md-sch-on-h').value = m._scheduleOnH !== undefined ? m._scheduleOnH : 8;
+  document.getElementById('md-sch-on-m').value = m._scheduleOnM !== undefined ? m._scheduleOnM : 0;
+  document.getElementById('md-sch-off-h').value = m._scheduleOffH !== undefined ? m._scheduleOffH : 22;
+  document.getElementById('md-sch-off-m').value = m._scheduleOffM !== undefined ? m._scheduleOffM : 0;
+  const days = m._scheduleDays !== undefined ? m._scheduleDays : 0x7F;
+  document.querySelectorAll('#panel-machinedetail .day-chip').forEach(el => {
+    const w = parseInt(el.dataset.w);
+    el.classList.toggle('on', !!(days & (1 << w)));
+  });
+  _mdScheduleDirty = false;
+  updateMDSchPreview();
+}
+
+function updateMDSchPreview() {
+  const active = document.getElementById('md-sch-active').checked;
+  const onH = document.getElementById('md-sch-on-h').value;
+  const onM = document.getElementById('md-sch-on-m').value;
+  const offH = document.getElementById('md-sch-off-h').value;
+  const offM = document.getElementById('md-sch-off-m').value;
+  const days = document.querySelectorAll('#panel-machinedetail .day-chip.on').length;
+  const el = document.getElementById('md-sch-preview');
+  if (!active) { el.innerHTML = 'Horario desactivado'; el.className = 'sch-preview'; return; }
+  el.innerHTML = `<strong>${String(onH).padStart(2,'0')}:${String(onM).padStart(2,'0')}</strong> a <strong>${String(offH).padStart(2,'0')}:${String(offM).padStart(2,'0')}</strong> · ${days} dia(s)`;
+  el.className = 'sch-preview' + (_mdScheduleDirty ? ' dirty' : '');
+}
+
+function mdMarkScheduleDirty() {
+  _mdScheduleDirty = true;
+  updateMDSchPreview();
+}
+
+function mdToggleDay(btn) {
+  btn.classList.toggle('on');
+  mdMarkScheduleDirty();
+}
+
+function mdPublish(topicSuffix, payload) {
+  if (!_mdMachineId || !mqttClient || !mqttClient.connected) return false;
+  const topic = 'peluche/' + topicSuffix;
+  mqttClient.publish(topic, String(payload));
+  return true;
+}
+
+function mdSetPower(mode) {
+  const labels = { on: '🟢 Encendida (manual)', off: '🔴 Apagada (manual)', auto: '⏰ Automatico' };
+  if (!mdPublish('power', mode === 'on' ? 'power_on' : mode === 'off' ? 'power_off' : 'power_auto')) {
+    showToast('MQTT desconectado', 'bad'); return;
+  }
+  const m = machines.find(x => x.id === _mdMachineId);
+  if (m) {
+    m._powerMode = mode;
+    m._powerModeAt = Date.now();
+    if (mode === 'on') m._powerStatus = 'on';
+    else if (mode === 'off') m._powerStatus = 'off';
+    updateMDPowerPill(m);
+  }
+  addMDLive('power', '⚡', labels[mode]);
+  showToast('Comando enviado: ' + labels[mode], 'ok');
+}
+
+function mdPowerCycle() {
+  if (!mdPublish('power', 'power_cycle')) { showToast('MQTT desconectado', 'bad'); return; }
+  const m = machines.find(x => x.id === _mdMachineId);
+  if (m) { m._powerCycling = true; updateMDPowerPill(m); }
+  addMDLive('power', '🔄', 'Reset de maquina iniciado');
+  showToast('Reseteando maquina...', 'ok');
+  setTimeout(() => {
+    if (m) { m._powerCycling = false; updateMDPowerPill(m); }
+  }, 6000);
+}
+
+function mdToggleRelay() {
+  const m = machines.find(x => x.id === _mdMachineId);
+  const current = m && m._relayActiveLow !== undefined ? m._relayActiveLow : false;
+  const payload = '{"action":"relay_polarity","active_low":' + (!current) + '}';
+  if (!mdPublish('comando', payload)) { showToast('MQTT desconectado', 'bad'); return; }
+  if (m) { m._relayActiveLow = !current; updateMDPowerPill(m); }
+  addMDLive('power', '🔄', 'Polaridad invertida');
+  showToast('Polaridad cambiada', 'ok');
+}
+
+function mdSaveSchedule() {
+  const active = document.getElementById('md-sch-active').checked;
+  const onH = parseInt(document.getElementById('md-sch-on-h').value);
+  const onM = parseInt(document.getElementById('md-sch-on-m').value);
+  const offH = parseInt(document.getElementById('md-sch-off-h').value);
+  const offM = parseInt(document.getElementById('md-sch-off-m').value);
+  let days = 0;
+  document.querySelectorAll('#panel-machinedetail .day-chip').forEach(el => {
+    if (el.classList.contains('on')) days |= (1 << parseInt(el.dataset.w));
+  });
+  const payload = JSON.stringify({
+    type: 'set_schedule', active, days, on: String(onH).padStart(2,'0')+':'+String(onM).padStart(2,'0'),
+    off: String(offH).padStart(2,'0')+':'+String(offM).padStart(2,'0'),
+    power_mode: active ? 'auto' : 'on'
+  });
+  if (!mdPublish('comando', payload)) { showToast('MQTT desconectado', 'bad'); return; }
+  const m = machines.find(x => x.id === _mdMachineId);
+  if (m) {
+    m._scheduleActive = active;
+    m._scheduleDays = days;
+    m._scheduleOnH = onH; m._scheduleOnM = onM;
+    m._scheduleOffH = offH; m._scheduleOffM = offM;
+  }
+  _mdScheduleDirty = false;
+  updateMDSchPreview();
+  addMDLive('power', '⏰', 'Horario guardado');
+  showToast('Horario enviado al ESP32', 'ok');
+}
+
+function mdSendCredits(n) {
+  if (!mdPublish('credito', String(n))) { showToast('MQTT desconectado', 'bad'); return; }
+  const m = machines.find(x => x.id === _mdMachineId);
+  if (m) { m.creditsSent = (m.creditsSent || 0) + n; renderMDStats(m); }
+  api('/machines/' + _mdMachineId + '/credits-sent', { method:'POST', body:JSON.stringify({credits:n}) }).catch(() => {});
+  addMDLive('🎮', 'credito', '+' + n + ' credito(s)');
+  document.getElementById('md-credit-fb').textContent = '+' + n + ' enviado(s)';
+  setTimeout(() => document.getElementById('md-credit-fb').textContent = '', 2000);
+  showToast('+' + n + ' creditos', 'ok');
+}
+
+function mdSendCustom() {
+  const n = parseInt(document.getElementById('md-credit-input').value);
+  if (!n || n < 1 || n > 50) { showToast('Valor entre 1 y 50', 'bad'); return; }
+  mdSendCredits(n);
+}
+
+function mdCopyKey() {
+  const key = document.getElementById('md-apikey').textContent;
+  navigator.clipboard.writeText(key);
+  showToast('API Key copiada', 'ok');
+}
+
+// MERCADO PAGO
+function loadMPConfig() {
+  if (USER.role !== 'admin') return;
+  document.getElementById('mp-config-card').style.display = 'block';
+  api('/mercadopago/token').then(d => {
+    const el = document.getElementById('mp-token-status');
+    if (d.configured) {
+      el.innerHTML = '<span style="color:var(--ng)">✅ Configurado</span>';
+    } else {
+      el.innerHTML = '<span style="color:var(--nr)">❌ No configurado</span>';
+    }
+  }).catch(() => {});
+  loadMPPayments();
+}
+
+function loadMPPayments() {
+  api('/mercadopago/payments').then(data => {
+    const el = document.getElementById('mp-payments-list');
+    if (!data || !data.length) {
+      el.innerHTML = '<div class="empty-state">Sin pagos</div>';
+      return;
+    }
+    el.innerHTML = data.reverse().slice(0, 20).map(p => {
+      const st = p.status === 'approved' ? '✅' : (p.status === 'pending' ? '⏳' : '❌');
+      return `<div style="display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid var(--border)">
+        <span>${st} $${(p.amount||0).toLocaleString('es-CL')}</span>
+        <span style="color:var(--muted)">${p.machineId} • ${p.createdAt ? new Date(p.createdAt).toLocaleDateString('es-CL') : ''}</span>
+      </div>`;
+    }).join('');
+  }).catch(() => {});
+}
+
+function saveMPToken() {
+  const token = document.getElementById('mp-token-input').value.trim();
+  if (!token) { showToast('Ingresa el Access Token', 'bad'); return; }
+  api('/mercadopago/token', { method:'POST', body:JSON.stringify({token}) }).then(() => {
+    showToast('Token guardado', 'ok');
+    loadMPConfig();
+  }).catch(e => showToast(e.message, 'bad'));
+}
+
+let _mpMachineId = null;
+let _mpPaymentId = null;
+let _mpPreferenceId = null;
+let _mpCheckInterval = null;
+
+function mdOpenMPPay() {
+  _mpMachineId = _mdMachineId;
+  const rev = document.getElementById('modal-revenue');
+  const revInner = rev.querySelector('.modal');
+  rev._origHTML = revInner.innerHTML;
+  revInner.className = 'modal cyan';
+  revInner.innerHTML = `
+    <h3>💰 Cobrar con Mercado Pago</h3>
+    <div id="mp-pay-body">
+      <div class="field"><label>Monto en $CLP</label><input id="mp-amount" type="number" min="100" value="500" step="100"/></div>
+      <div class="field"><label>Creditos a entregar</label><input id="mp-credits" type="number" min="1" value="1"/></div>
+      <div class="field"><label>Descripcion</label><input id="mp-desc" type="text" value="Recarga de creditos" placeholder="Ej: 1 jugada"/></div>
+      <div class="modal-actions" style="margin-top:16px">
+        <button class="btn-sm" id="mp-cancel">Cancelar</button>
+        <button class="btn-sm green" id="mp-generate">🔗 Generar link</button>
+      </div>
+    </div>
+    <div id="mp-pay-result" style="display:none;padding:4px 0">
+      <div id="mp-qr" style="text-align:center;padding:8px 0 12px"></div>
+      <div style="text-align:center;font-size:18px;font-weight:700;color:var(--ng);margin-bottom:2px" id="mp-pay-amount"></div>
+      <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:10px" id="mp-pay-desc"></div>
+      <div style="text-align:center;font-size:13px;color:var(--ny);margin-bottom:14px;padding:8px;background:rgba(255,238,0,.06);border-radius:6px" id="mp-pay-status">Esperando pago...</div>
+      <div class="modal-actions">
+        <a id="mp-pay-link" href="#" target="_blank" class="btn-sm green" style="text-decoration:none;text-align:center;flex:1">Abrir en MP</a>
+        <button class="btn-sm" id="mp-refresh" style="flex-shrink:0">🔄</button>
+      </div>
+      <div style="text-align:center;margin-top:10px">
+        <button class="btn-sm" id="mp-close2">Cerrar</button>
+      </div>
+    </div>`;
+  document.getElementById('mp-cancel').onclick = () => { restoreMPModal(); closeModal('modal-revenue'); };
+  document.getElementById('mp-generate').onclick = generateMPPayment;
+  document.getElementById('mp-close2').onclick = () => { restoreMPModal(); closeModal('modal-revenue'); };
+  const refBtn = document.getElementById('mp-refresh');
+  if (refBtn) refBtn.onclick = checkMPPayment;
+  openModal('modal-revenue');
+}
+
+function restoreMPModal() {
+  const rev = document.getElementById('modal-revenue');
+  if (rev._origHTML) rev.querySelector('.modal').innerHTML = rev._origHTML;
+}
+
+function generateMPPayment() {
+  const amount = parseInt(document.getElementById('mp-amount').value);
+  const credits = parseInt(document.getElementById('mp-credits').value);
+  const desc = document.getElementById('mp-desc').value.trim() || 'Recarga de creditos';
+  if (!amount || amount < 100) { showToast('Monto minimo $100', 'bad'); return; }
+  if (!credits) { showToast('Ingresa un numero de creditos', 'bad'); return; }
+  document.getElementById('mp-pay-body').style.display = 'none';
+  document.getElementById('mp-pay-result').style.display = '';
+  document.getElementById('mp-pay-status').textContent = '⏳ Generando pago...';
+  document.getElementById('mp-pay-status').style.color = 'var(--ny)';
+  api('/mercadopago/pay', { method:'POST', body:JSON.stringify({ machineId: _mpMachineId, amount, credits, description: desc }) })
+    .then(p => {
+      _mpPaymentId = p.id;
+      _mpPreferenceId = p.mpId;
+      document.getElementById('mp-pay-amount').textContent = '$' + (p.amount || amount).toLocaleString('es-CL');
+      document.getElementById('mp-pay-desc').textContent = desc + ' - ' + credits + ' credito(s)';
+      document.getElementById('mp-pay-status').textContent = '✅ Pago generado! Esperando pago...';
+      document.getElementById('mp-pay-status').style.color = 'var(--ng)';
+      document.getElementById('mp-pay-link').href = p.initPoint || '#';
+      document.getElementById('mp-qr').innerHTML = p.initPoint ?
+        `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(p.initPoint)}" style="border-radius:8px;background:#fff;padding:8px;max-width:200px"/>` : '';
+      if (_mpCheckInterval) clearInterval(_mpCheckInterval);
+      _mpCheckInterval = setInterval(() => checkMPPayment(), 15000);
+      const statusEl = document.getElementById('md-mp-status');
+      if (statusEl) {
+        statusEl.innerHTML = `✅ Pago generado: <a href="${p.initPoint}" target="_blank" style="color:var(--nc)">Abrir link</a>`;
+        statusEl.style.color = 'var(--ng)';
+        document.getElementById('md-mp-qr').innerHTML = document.getElementById('mp-qr').innerHTML;
+      }
+    }).catch(e => {
+      document.getElementById('mp-pay-status').textContent = '❌ ' + e.message;
+      document.getElementById('mp-pay-status').style.color = 'var(--nr)';
+      showToast(e.message, 'bad');
+    });
+}
+
+function checkMPPayment() {
+  if (!_mpPaymentId || !_mpPreferenceId) return;
+  api('/mercadopago/check-payment', { method:'POST', body:JSON.stringify({
+    preferenceId: _mpPreferenceId, localId: _mpPaymentId,
+  })}).then(r => {
+    const statusEl = document.getElementById('md-mp-status');
+    if (r.status === 'approved') {
+      statusEl.innerHTML = '✅ Pagado!';
+      statusEl.style.color = 'var(--ng)';
+      if (_mpCheckInterval) { clearInterval(_mpCheckInterval); _mpCheckInterval = null; }
+      showToast('Pago recibido!', 'ok');
+      loadMPPayments();
+      const mdM = machines.find(x => x.id === _mpMachineId);
+      if (mdM) renderMDMPPayments(mdM);
+    }
+  }).catch(() => {});
+}
+
+function mdRegenKey() {
+  neonPrompt('🔑 Regenerar API Key', 'PIN de administrador', { type: 'password', color: 'orange' }).then(pin => {
+    if (!pin) return;
+    api('/machines/' + _mdMachineId + '/regenerate-key', { method:'POST', body:JSON.stringify({pin}) })
+      .then(d => {
+        document.getElementById('md-apikey').textContent = d.apiKey;
+        showToast('Nueva API Key generada', 'ok');
+        const m = machines.find(x => x.id === _mdMachineId);
+        if (m) m.apiKey = d.apiKey;
+      }).catch(e => showToast(e.message, 'bad'));
+  });
+}
+
+function addMDLive(icon, type, msg) {
+  const time = new Date().toLocaleTimeString('es-CL');
+  _mdLiveEvents.unshift({ time, icon, type, msg });
+  if (_mdLiveEvents.length > 50) _mdLiveEvents.length = 50;
+  renderMDLive();
+}
+
+function renderMDLive() {
+  const el = document.getElementById('md-live');
+  if (!_mdLiveEvents.length) { el.innerHTML = '<div class="empty-state">Esperando datos...</div>'; return; }
+  el.innerHTML = _mdLiveEvents.map(e =>
+    `<div class="live-line"><span class="live-time">${esc(e.time)}</span><span class="live-icon">${e.icon}</span><span class="live-msg ${'live-'+e.type}">${esc(e.msg)}</span></div>`
+  ).join('');
+}
+
+// Change admin PIN
+function openChangePin() {
+  const rev = document.getElementById('modal-revenue');
+  const revInner = rev.querySelector('.modal');
+  rev._origHTML = revInner.innerHTML;
+  revInner.className = 'modal orange';
+  revInner.innerHTML = `
+    <h3>🔑 Cambiar PIN de administrador</h3>
+    <div class="field"><label>PIN actual</label><input id="cp-current" type="password" placeholder="PIN actual"/></div>
+    <div class="field"><label>Nuevo PIN (min 4 caracteres)</label><input id="cp-new" type="password" placeholder="Nuevo PIN"/></div>
+    <div class="modal-actions">
+      <button class="btn-sm" id="cp-cancel">Cancelar</button>
+      <button class="btn-sm green" id="cp-ok">Cambiar PIN</button>
+    </div>`;
+  document.getElementById('cp-cancel').onclick = () => {
+    revInner.innerHTML = rev._origHTML; rev._origHTML = null; closeModal('modal-revenue');
+  };
+  document.getElementById('cp-ok').onclick = changeAdminPin;
+  openModal('modal-revenue');
+}
+
+function changeAdminPin() {
+  const currentPin = document.getElementById('cp-current').value;
+  const newPin = document.getElementById('cp-new').value;
+  if (!newPin || newPin.length < 4) { showToast('PIN debe tener al menos 4 caracteres', 'bad'); return; }
+  api('/admin/pin', { method:'PUT', body:JSON.stringify({currentPin, newPin}) })
+    .then(() => {
+      const rev = document.getElementById('modal-revenue');
+      if (rev._origHTML) rev.querySelector('.modal').innerHTML = rev._origHTML;
+      rev._origHTML = null;
+      closeModal('modal-revenue');
+      showToast('PIN cambiado exitosamente', 'ok');
+    }).catch(e => showToast(e.message, 'bad'));
+}
+
+// Update machine detail from MQTT messages
+function updateMDMachineFromMQTT(id, data) {
+  if (id !== _mdMachineId) return;
+  const m = machines.find(x => x.id === id);
+  if (!m) return;
+  if (data.power !== undefined) m._powerStatus = data.power;
+  if (data.power_mode !== undefined && (!m._powerModeAt || Date.now() - m._powerModeAt > 15000)) {
+    m._powerMode = data.power_mode;
+  }
+  if (data.power_cycling === true || data.power_cycling === 'true') m._powerCycling = true;
+  else if (data.power_cycling === false || data.power_cycling === 'false') m._powerCycling = false;
+  if (data.monedas !== undefined) {
+    m._lastMonedaValue = data.monedas;
+    if (m._monedaAtClose == null) {
+      m.ultimasMonedas = data.monedas;
+    } else {
+      m.ultimasMonedas = Math.max(0, data.monedas - m._monedaAtClose);
+    }
+  }
+  if (data.premios !== undefined) {
+    m._lastPremioValue = data.premios;
+    if (m._premioAtClose == null) {
+      m.ultimosPremios = data.premios;
+    } else {
+      m.ultimosPremios = Math.max(0, data.premios - m._premioAtClose);
+    }
+  }
+  if (data.rssi !== undefined) m.rssi = data.rssi;
+  if (data.schedule_active !== undefined) m._scheduleActive = data.schedule_active === true || data.schedule_active === 'true';
+  if (data.schedule_days !== undefined) m._scheduleDays = typeof data.schedule_days === 'number' ? data.schedule_days : parseInt(data.schedule_days);
+  if (data.schedule_on !== undefined) {
+    const parts = data.schedule_on.split(':');
+    if (parts.length === 2) { m._scheduleOnH = parseInt(parts[0]); m._scheduleOnM = parseInt(parts[1]); }
+  }
+  if (data.schedule_off !== undefined) {
+    const parts = data.schedule_off.split(':');
+    if (parts.length === 2) { m._scheduleOffH = parseInt(parts[0]); m._scheduleOffM = parseInt(parts[1]); }
+  }
+  if (data.relay_active_low !== undefined) m._relayActiveLow = data.relay_active_low === true || data.relay_active_low === 'true';
+  renderMDStats(m);
+  updateMDPowerPill(m);
+}
+
+// Auto-load
+if (TOKEN) {
+  api('/me').then(u => { USER = u; startApp(); }).catch(() => { localStorage.removeItem('ng_token'); location.reload(); });
+}
+</script>
+</body></html>
