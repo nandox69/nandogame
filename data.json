@@ -37,8 +37,8 @@
       "installer": "nando",
       "image": "",
       "created": "2026-06-15T02:43:52.585Z",
-      "lastSeen": "2026-06-15T05:33:22.005Z",
-      "status": "offline",
+      "lastSeen": "2026-06-15T07:36:01.848Z",
+      "status": "alarm",
       "observations": [],
       "counters": {
         "coin1": {
@@ -63,11 +63,11 @@
         }
       },
       "digitalReadings": {
-        "coin1": 37,
-        "win": 201
+        "coin1": 48,
+        "win": 208
       },
       "pelucheMax": 30,
-      "rssi": -53,
+      "rssi": -56,
       "ultimoCierre": {
         "fecha": "2026-06-15T03:57:45.870Z",
         "usuario": "nando",
@@ -265,6 +265,62 @@
         "counterCoin": 10090,
         "counterOut": 90
       }
+    },
+    {
+      "id": "M0005",
+      "name": "test-alarm",
+      "apiKey": "nk_738ed6db360c4b4354e54e2b41e9d6d71378ad2c6120880f",
+      "location": "",
+      "installer": "",
+      "image": "",
+      "created": "2026-06-16T03:19:38.651Z",
+      "lastSeen": "2026-06-16T03:23:25.856Z",
+      "status": "offline",
+      "observations": [],
+      "counters": {
+        "coin1": {
+          "label": "Moneda 1",
+          "valuePerPulse": 500,
+          "enabled": true
+        },
+        "coin2": {
+          "label": "Moneda 2",
+          "valuePerPulse": 200,
+          "enabled": false
+        },
+        "bill": {
+          "label": "Billete",
+          "valuePerPulse": 1000,
+          "enabled": false
+        },
+        "win": {
+          "label": "Premio",
+          "valuePerPulse": 0,
+          "enabled": true
+        }
+      },
+      "initialCounters": {
+        "coin": 0,
+        "out": 0
+      },
+      "counterHistory": [
+        {
+          "timestamp": "2026-06-16T03:19:38.651Z",
+          "user": "nando",
+          "coin": 0,
+          "out": 0
+        }
+      ],
+      "digitalReadings": {
+        "coin1": 1,
+        "coin2": 0,
+        "bill": 0,
+        "win": 1
+      },
+      "pelucheMax": 30,
+      "creditValue": 500,
+      "pelucheRestockAt": 0,
+      "rssi": -68
     }
   ],
   "revenue": [
@@ -697,14 +753,30 @@
   ],
   "alarms": [
     {
-      "machineId": "M0001",
-      "type": "peluches_bajos",
-      "message": "M0001 peluches bajos (0/30) — rellenar",
-      "triggeredAt": "2026-06-15T02:50:33.497Z",
-      "resolved": false
+      "id": "A1",
+      "message": "test",
+      "type": "offline_6h",
+      "machineId": "M0005",
+      "resolved": true,
+      "triggeredAt": "2026-06-15T23:19:38.6927875-04:00"
     }
   ],
   "loginLog": [
+    {
+      "user": "nando",
+      "time": "2026-06-16T03:19:38.600Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-16T03:19:27.754Z",
+      "ip": "::1"
+    },
+    {
+      "user": "nando",
+      "time": "2026-06-16T03:19:09.158Z",
+      "ip": "::1"
+    },
     {
       "user": "carlos",
       "time": "2026-06-15T05:17:42.941Z",

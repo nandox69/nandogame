@@ -20,6 +20,14 @@ const MQTT_HOST = process.env.MQTT_HOST || 'wss://g71b6171.ala.us-east-1.emqxsl.
 const MQTT_USER = process.env.MQTT_USER || 'nandox69';
 const MQTT_PASS = process.env.MQTT_PASS || 'osorno7669';
 
+function migrateAlarmIds() {
+  const db = readDB();
+  let changed = false;
+  (db.alarms || []).forEach(a => { if (!a.id) { a.id = 'A' + String(db.alarms.indexOf(a) + 1).padStart(4, '0'); changed = true; } });
+  if (changed) writeDB(db);
+}
+migrateAlarmIds();
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -83,13 +91,18 @@ function checkPelucheAlarm(m, db) {
   if (pct < 0.3 && restantes < m.pelucheMax) {
     const yaHay = db.alarms.some(a => a.machineId === m.id && a.type === 'peluches_bajos' && !a.resolved);
     if (!yaHay) {
+      const id = 'A' + String(db.alarms.length + 1).padStart(4, '0');
       db.alarms.push({
-        machineId: m.id, type: 'peluches_bajos',
+        id, machineId: m.id, type: 'peluches_bajos',
         message: `${m.id} peluches bajos (${Math.max(0,restantes)}/${m.pelucheMax}) — rellenar`,
         triggeredAt: new Date().toISOString(), resolved: false
       });
     }
   }
+}
+
+function genAlarmId(db) {
+  return 'A' + String(db.alarms.length + 1).padStart(4, '0');
 }
 
 function checkAlarms() {
@@ -103,7 +116,7 @@ function checkAlarms() {
     if (diff > 6 * 3600 * 1000 && m.status !== 'alarm') {
       m.status = 'alarm';
       db.alarms.push({
-        machineId: m.id, type: 'offline_6h', message: `Maquina ${m.name} lleva mas de 6h sin conexion`,
+        id: genAlarmId(db), machineId: m.id, type: 'offline_6h', message: `Maquina ${m.name} lleva mas de 6h sin conexion`,
         triggeredAt: new Date().toISOString(), resolved: false
       });
     }
@@ -116,7 +129,7 @@ function checkAlarms() {
       const yaHayAlarma = db.alarms.some(a => a.machineId === m.id && a.type === 'peluches_bajos' && !a.resolved);
       if (pct < 0.3 && !yaHayAlarma) {
         db.alarms.push({
-          machineId: m.id, type: 'peluches_bajos',
+          id: genAlarmId(db), machineId: m.id, type: 'peluches_bajos',
           message: `${m.id} peluches bajos (${Math.max(0,restantes)}/${m.pelucheMax}) — rellenar`,
           triggeredAt: new Date().toISOString(), resolved: false
         });
