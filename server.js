@@ -547,7 +547,15 @@ app.get('/api/alarms', auth(['admin']), (req, res) => {
 app.put('/api/alarms/:id/resolve', auth(['admin']), (req, res) => {
   const db = readDB();
   const a = db.alarms.find(x => x.id === req.params.id);
-  if (a) a.resolved = true;
+  if (!a) return res.status(404).json({ error: 'Alarma no encontrada' });
+  a.resolved = true;
+  if (a.machineId) {
+    const m = db.machines.find(x => x.id === a.machineId);
+    if (m && m.status === 'alarm') {
+      const diff = Date.now() - new Date(m.lastSeen || 0).getTime();
+      m.status = diff < 60000 ? 'online' : 'offline';
+    }
+  }
   writeDB(db);
   res.json({ ok: true });
 });
